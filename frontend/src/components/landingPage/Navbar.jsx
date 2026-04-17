@@ -5,68 +5,82 @@ export default function Navbar() {
 
   useEffect(() => {
     const sections = ["home", "features", "workflow", "cta"];
-
     const observers = [];
 
     sections.forEach((section) => {
-      const el = document.querySelector(`#${section}`);
+      const el = document.getElementById(section);
       if (!el) return;
 
       const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              setActive(section);
-            }
-          });
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setActive(section);
+          }
         },
-        {
-          root: null,
-          threshold: 0.6, // section must be 60% visible
-        }
+        { threshold: 0.6 }
       );
 
       observer.observe(el);
       observers.push(observer);
     });
 
-    return () => {
-      observers.forEach((obs) => obs.disconnect());
-    };
+    return () => observers.forEach((o) => o.disconnect());
   }, []);
 
-  const linkClass = (section) =>
-    `cursor-pointer transition-all duration-200 ${
-      active === section
-        ? "text-[#004A99] border-b-2 border-[#004A99] pb-1"
-        : "text-[#64748B] hover:text-[#004A99]"
-    }`;
+  const scrollToSection = (id) => {
+    const el = document.getElementById(id);
+
+    if (!el) return;
+
+    el.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
+
+  const linkBase =
+    "relative cursor-pointer text-sm font-medium transition-colors duration-200";
+
+  const links = [
+    { id: "home", label: "Home" },
+    { id: "features", label: "Features" },
+    { id: "workflow", label: "Workflow" },
+    { id: "cta", label: "Get Started" },
+  ];
 
   return (
     <nav className="w-full px-8 py-4 flex items-center justify-between bg-[#F8F9FF] shadow-sm sticky top-0 z-50">
-      
-      {/* Logo */}
+
+      {/* LOGO */}
       <div className="flex items-center gap-2 font-bold text-lg">
         <img src="/favicon.svg" alt="QA Platform Logo" className="h-8" />
       </div>
 
-      {/* Links */}
-      <div className="flex items-center gap-8 text-sm font-medium">
-        <a href="#home" className={linkClass("home")}>
-          Home
-        </a>
+      {/* LINKS */}
+      <div className="flex items-center gap-8">
 
-        <a href="#features" className={linkClass("features")}>
-          Features
-        </a>
+        {links.map((link) => (
+          <button
+            key={link.id}
+            onClick={() => scrollToSection(link.id)}
+            className={`${linkBase} ${
+              active === link.id
+                ? "text-[#004A99]"
+                : "text-[#64748B] hover:text-[#004A99]"
+            } pb-1`}
+          >
+            <span className="relative">
+              {link.label}
 
-        <a href="#workflow" className={linkClass("workflow")}>
-          Workflow
-        </a>
+              <span
+                className={`absolute left-0 -bottom-1 h-[2px] bg-[#004A99] transition-all duration-300 ${
+                  active === link.id ? "w-full" : "w-0"
+                }`}
+              />
+            </span>
+          </button>
+        ))}
 
-        <a href="#cta" className={linkClass("cta")}>
-          Get Started
-        </a>
       </div>
     </nav>
   );
