@@ -3,11 +3,8 @@ import { Eye, ChevronDown } from "lucide-react";
 import PrimaryButton from "../components/auth/PrimaryButton";
 import AuthFooter from "../components/auth/AuthFooter";
 import { Link } from "react-router-dom";
-import { signup } from "../services/authService";
 
 export default function Signup() {
-
-  
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
@@ -15,33 +12,30 @@ export default function Signup() {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  try {
+    /*  try {
     const result = await signup({
       name,
       email,
       role,
       password
-    });
+    }); */
 
-    console.log("SUCCESS:", result);
+    console.log("SUCCESS:");
 
-  } catch (err) {
+    /*   } catch (err) {
     console.log("ERROR signup:", err.response?.data || err.message);
-  }
-};
+  } */
+  };
 
   return (
     <div className="h-screen w-full flex flex-col bg-[#F4F7FA] overflow-hidden">
-
       <div className="flex-grow" />
 
       <div className="flex justify-center px-4">
         <div className="w-[380px] bg-white border border-[#E2E8F0] rounded-xl shadow-sm pt-5 pb-5 px-10 flex flex-col items-center">
-
           <div className="mb-2">
             <img src="/favicon.svg" className="w-6 h-6" />
           </div>
@@ -56,7 +50,6 @@ export default function Signup() {
 
           {/*  FORM */}
           <form className="w-full" onSubmit={handleSubmit}>
-
             {/* NAME */}
             <div className="mb-3">
               <label className="block text-[10px] font-semibold text-[#255DAD] uppercase mb-1">
@@ -121,20 +114,17 @@ export default function Signup() {
                 className="w-full border-b border-[#CBD5E1] py-1.5 text-sm placeholder-[#94A3B8] focus:outline-none focus:border-[#2B6CB0]"
               />
 
-              <Eye onClick={() => setShowPassword(!showPassword)}className="absolute right-0 top-[28px] w-4 h-4 text-[#64748B] cursor-pointer"/>
-                
+              <Eye
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-0 top-[28px] w-4 h-4 text-[#64748B] cursor-pointer"
+              />
             </div>
 
-            <PrimaryButton type="submit">
-              CREATE
-            </PrimaryButton>
-
+            <PrimaryButton type="submit">CREATE</PrimaryButton>
           </form>
 
           <div className="text-center mt-4">
-            <p className="text-[12px] text-[#64748B]">
-              Already have access?
-            </p>
+            <p className="text-[12px] text-[#64748B]">Already have access?</p>
 
             <Link
               to="/login"
@@ -143,14 +133,12 @@ export default function Signup() {
               Return to Login
             </Link>
           </div>
-
         </div>
       </div>
 
       <div className="flex-grow" />
 
       <AuthFooter />
-
     </div>
   );
 }
