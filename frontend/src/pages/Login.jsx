@@ -1,35 +1,44 @@
 import { useState } from "react";
 import { Mail, Key } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
+import { toast } from "sonner";
 import PrimaryButton from "../components/auth/PrimaryButton";
 import AuthFooter from "../components/auth/AuthFooter";
 import { login } from "../services/authService";
+import { validateLogin } from "../utils/validate";
 
 export default function Login() {
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError]       = useState("");
   const [loading, setLoading]   = useState(false);
 
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+
+    // Frontend validation
+    const error = validateLogin({ email, password });
+    if (error) {
+      toast.error(error);
+      return;
+    }
+
     setLoading(true);
 
     try {
       const result = await login({ email, password });
+      toast.success(`Welcome back, ${result.user.name}!`);
 
       const role = result.user.role;
-      if (role === "Dean")                navigate("/dashboard/dean");
+      if (role === "Dean")                    navigate("/dashboard/dean");
       else if (role === "Head of Department") navigate("/dashboard/hod");
-      else if (role === "Rector")         navigate("/dashboard/rector");
-      else                                navigate("/dashboard");
+      else if (role === "Rector")             navigate("/dashboard/rector");
+      else                                    navigate("/dashboard");
 
     } catch (err) {
       const message = err.response?.data?.message || "Something went wrong";
-      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -46,12 +55,6 @@ export default function Login() {
         <h1 className="text-[20px] font-semibold text-[#334155] mb-8">
           Log in
         </h1>
-
-        {error && (
-          <div className="w-full mb-4 px-3 py-2 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-[12px] text-red-600">{error}</p>
-          </div>
-        )}
 
         <form className="w-full" onSubmit={handleSubmit}>
 
