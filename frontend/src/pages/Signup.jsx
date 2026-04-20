@@ -36,7 +36,6 @@ export default function Signup() {
 
       <div className="flex justify-center px-4">
         <div className="w-[380px] bg-white border border-[#E2E8F0] rounded-xl shadow-sm pt-5 pb-5 px-10 flex flex-col items-center">
-
           <div className="mb-2">
             <img src="/favicon.svg" className="w-6 h-6" />
           </div>
@@ -51,7 +50,6 @@ export default function Signup() {
 
           {/* FORM */}
           <form className="w-full" onSubmit={handleSubmit}>
-
             {/* NAME */}
             <div className="mb-3">
               <label className="block text-[10px] font-semibold text-[#255DAD] uppercase mb-1">
@@ -122,9 +120,7 @@ export default function Signup() {
               />
             </div>
 
-            <PrimaryButton type="submit">
-              CREATE
-            </PrimaryButton>
+            <PrimaryButton type="submit">CREATE</PrimaryButton>
           </form>
 
           <div className="text-center mt-4">
