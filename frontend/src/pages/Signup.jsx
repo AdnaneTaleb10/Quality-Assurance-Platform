@@ -3,6 +3,7 @@ import { Eye, ChevronDown } from "lucide-react";
 import PrimaryButton from "../components/auth/PrimaryButton";
 import AuthFooter from "../components/auth/AuthFooter";
 import { Link } from "react-router-dom";
+import { signup } from "../services/authService";
 
 export default function Signup() {
   const [name, setName] = useState("");
@@ -15,19 +16,18 @@ export default function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    /*  try {
-    const result = await signup({
-      name,
-      email,
-      role,
-      password
-    }); */
+    try {
+      const result = await signup({
+        name,
+        email,
+        role,
+        password,
+      });
 
-    console.log("SUCCESS:");
-
-    /*   } catch (err) {
-    console.log("ERROR signup:", err.response?.data || err.message);
-  } */
+      console.log("SUCCESS:", result);
+    } catch (err) {
+      console.log("ERROR signup:", err.response?.data || err.message);
+    }
   };
 
   return (
@@ -36,6 +36,7 @@ export default function Signup() {
 
       <div className="flex justify-center px-4">
         <div className="w-[380px] bg-white border border-[#E2E8F0] rounded-xl shadow-sm pt-5 pb-5 px-10 flex flex-col items-center">
+
           <div className="mb-2">
             <img src="/favicon.svg" className="w-6 h-6" />
           </div>
@@ -48,8 +49,9 @@ export default function Signup() {
             Join the Institutional Excellence Quality Assurance platform.
           </p>
 
-          {/*  FORM */}
+          {/* FORM */}
           <form className="w-full" onSubmit={handleSubmit}>
+
             {/* NAME */}
             <div className="mb-3">
               <label className="block text-[10px] font-semibold text-[#255DAD] uppercase mb-1">
@@ -92,9 +94,9 @@ export default function Signup() {
                 className="w-full border-b border-[#CBD5E1] py-1.5 text-sm text-[#334155] appearance-none bg-transparent focus:outline-none"
               >
                 <option value="">Choose institutional role...</option>
-                <option value="Admin">Dean</option>
-                <option value="Admin">Head of Department</option>
-                <option value="User">Rector</option>
+                <option value="2">Dean</option>
+                <option value="3">Head of Department</option>
+                <option value="4">Rector</option>
               </select>
 
               <ChevronDown className="absolute right-0 top-[28px] w-4 h-4 text-[#64748B] pointer-events-none" />
@@ -120,7 +122,9 @@ export default function Signup() {
               />
             </div>
 
-            <PrimaryButton type="submit">CREATE</PrimaryButton>
+            <PrimaryButton type="submit">
+              CREATE
+            </PrimaryButton>
           </form>
 
           <div className="text-center mt-4">
@@ -137,7 +141,6 @@ export default function Signup() {
       </div>
 
       <div className="flex-grow" />
-
       <AuthFooter />
     </div>
   );
