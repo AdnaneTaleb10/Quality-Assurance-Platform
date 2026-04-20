@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function Navbar() {
   const [active, setActive] = useState("home");
 
   useEffect(() => {
-    const sections = ["home", "features", "workflow", "cta"];
+    const sections = ["home", "features", "workflow"];
     const observers = [];
 
     sections.forEach((section) => {
@@ -29,7 +30,6 @@ export default function Navbar() {
 
   const scrollToSection = (id) => {
     const el = document.getElementById(id);
-
     if (!el) return;
 
     el.scrollIntoView({
@@ -45,7 +45,6 @@ export default function Navbar() {
     { id: "home", label: "Home" },
     { id: "features", label: "Features" },
     { id: "workflow", label: "Workflow" },
-    { id: "cta", label: "Get Started" },
   ];
 
   return (
@@ -71,7 +70,6 @@ export default function Navbar() {
           >
             <span className="relative">
               {link.label}
-
               <span
                 className={`absolute left-0 -bottom-1 h-[2px] bg-[#004A99] transition-all duration-300 ${
                   active === link.id ? "w-full" : "w-0"
@@ -80,6 +78,13 @@ export default function Navbar() {
             </span>
           </button>
         ))}
+
+        <Link
+          to="/login"
+          className="bg-[#004A99] text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition"
+        >
+          Get Started
+        </Link>
 
       </div>
     </nav>
