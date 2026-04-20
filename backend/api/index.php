@@ -1,92 +1,44 @@
 <?php
 
+session_start();
+
+header("Access-Control-Allow-Origin: http://localhost:5173");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Credentials: true"); // ← required for cookies
 header("Content-Type: application/json");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
 
 require_once __DIR__ . "/../db.php";
 
 $method = $_SERVER['REQUEST_METHOD'];
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$uri    = preg_replace('#^.*?/api#', '', $uri);
+$uri    = rtrim($uri, '/');
 
-// remove /api prefix
-$uri = str_replace("/api", "", $uri);
-
-// DOMAINS
-if ($method === "GET" && $uri === "/domains") {
-
-    $stmt = $pdo->query("SELECT id, name FROM domains");
-    echo json_encode($stmt->fetchAll());
+if ($method === "POST" && $uri === "/auth/register") {
+    require __DIR__ . "/../controllers/auth/register.php";
     exit;
 }
 
-// CHAMPS
-if ($method === "GET" && $uri === "/champs") {
-
-    $domainId = $_GET['domain_id'] ?? null;
-
-    if (!$domainId) {
-        http_response_code(400);
-        echo json_encode(["error" => "domain_id is required"]);
-        exit;
-    }
-
-    $stmt = $pdo->prepare("
-        SELECT id, domain_id, code, title 
-        FROM champs 
-        WHERE domain_id = ?
-    ");
-
-    $stmt->execute([$domainId]);
-
-    echo json_encode($stmt->fetchAll());
+if ($method === "POST" && $uri === "/auth/login") {
+    require __DIR__ . "/../controllers/auth/login.php";
     exit;
 }
 
-// REFERENCES
-if ($method === "GET" && $uri === "/references") {
-
-    $champId = $_GET['champ_id'] ?? null;
-
-    if (!$champId) {
-        http_response_code(400);
-        echo json_encode(["error" => "champ_id is required"]);
-        exit;
-    }
-
-    $stmt = $pdo->prepare("
-        SELECT id, champ_id, code, description, interpretation
-        FROM references_table
-        WHERE champ_id = ?
-    ");
-
-    $stmt->execute([$champId]);
-
-    echo json_encode($stmt->fetchAll());
+if ($method === "POST" && $uri === "/auth/logout") {
+    require __DIR__ . "/../controllers/auth/logout.php";
     exit;
 }
 
-// QUESTIONS
-if ($method === "GET" && $uri === "/questions") {
-
-    $referenceId = $_GET['reference_id'] ?? null;
-
-    if (!$referenceId) {
-        http_response_code(400);
-        echo json_encode(["error" => "reference_id is required"]);
-        exit;
-    }
-
-    $stmt = $pdo->prepare("
-        SELECT id, reference_id, code, text
-        FROM questions
-        WHERE reference_id = ?
-    ");
-
-    $stmt->execute([$referenceId]);
-
-    echo json_encode($stmt->fetchAll());
+if ($method === "GET" && $uri === "/auth/me") {
+    require __DIR__ . "/../controllers/auth/me.php";
     exit;
 }
 
-// DEFAULT 404
 http_response_code(404);
-echo json_encode(["error" => "Route not found"]);
+echo json_encode(["error" => "Route not found", "uri" => $uri]);
