@@ -1,28 +1,42 @@
 import { useState } from "react";
 import { Mail, Key } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
 import PrimaryButton from "../components/auth/PrimaryButton";
 import AuthFooter from "../components/auth/AuthFooter";
-import { Link } from "react-router-dom";
+import { login } from "../services/authService";
 
 export default function Login() {
-
-  
-  const [email, setEmail] = useState("");
+  const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError]       = useState("");
+  const [loading, setLoading]   = useState(false);
 
-  
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
-    console.log("LOGIN DATA:", { email, password });
+    try {
+      const result = await login({ email, password });
 
-    // ici plus tard -> appel backend
-    // fetch("/api/login", ...)
+      const role = result.user.role;
+      if (role === "Dean")                navigate("/dashboard/dean");
+      else if (role === "Head of Department") navigate("/dashboard/hod");
+      else if (role === "Rector")         navigate("/dashboard/rector");
+      else                                navigate("/dashboard");
+
+    } catch (err) {
+      const message = err.response?.data?.message || "Something went wrong";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="h-screen flex flex-col items-center justify-center bg-[#F4F7FA] relative font-sans">
-
       <div className="w-[380px] bg-white border border-[#E2E8F0] rounded-xl shadow-sm pt-10 pb-8 px-10 flex flex-col items-center">
 
         <div className="mb-4">
@@ -33,18 +47,20 @@ export default function Login() {
           Log in
         </h1>
 
-        {/*  FORM */}
+        {error && (
+          <div className="w-full mb-4 px-3 py-2 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-[12px] text-red-600">{error}</p>
+          </div>
+        )}
+
         <form className="w-full" onSubmit={handleSubmit}>
 
-          {/* EMAIL */}
           <div className="mb-5">
             <label className="block text-[10px] font-semibold text-[#255DAD] uppercase mb-2">
               Email
             </label>
-
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
-
               <input
                 type="email"
                 value={email}
@@ -55,15 +71,12 @@ export default function Login() {
             </div>
           </div>
 
-          {/* PASSWORD */}
           <div className="mb-6">
             <label className="block text-[10px] font-semibold text-[#255DAD] uppercase mb-2">
               Password
             </label>
-
             <div className="relative">
               <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
-
               <input
                 type="password"
                 value={password}
@@ -74,31 +87,23 @@ export default function Login() {
             </div>
           </div>
 
-          <PrimaryButton type="submit">
-            Connect
+          <PrimaryButton type="submit" disabled={loading}>
+            {loading ? "Connecting..." : "Connect"}
           </PrimaryButton>
 
         </form>
 
-        <div className="w-full h-px bg-[#E2E8F0] my-6"></div>
+        <div className="w-full h-px bg-[#E2E8F0] my-6" />
 
         <div className="text-center">
-          <p className="text-[13px] text-[#64748B]">
-            Don’t have an account?
-          </p>
-
-          <Link
-            to="/signup"
-            className="text-[#2B6CB0] text-[13px] font-semibold hover:underline"
-          >
+          <p className="text-[13px] text-[#64748B]">Don't have an account?</p>
+          <Link to="/signup" className="text-[#2B6CB0] text-[13px] font-semibold hover:underline">
             Sign Up
           </Link>
         </div>
 
       </div>
-
       <AuthFooter absolute />
-
     </div>
   );
 }
