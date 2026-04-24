@@ -87,6 +87,12 @@ if ($method === "GET" && $uri === "/questions") {
     exit;
 }
 
+// EVALUATION ROUTES - Route to evaluation.php
+if (strpos($uri, "/evaluation") === 0) {
+    include __DIR__ . "/feature_evaluation/evaluation.php";
+    exit;
+}
+
 // DEFAULT 404
 http_response_code(404);
 echo json_encode(["error" => "Route not found"]);
