@@ -1,5 +1,4 @@
 <?php
-// $pdo and $data are already available from index.php
 
 $data = json_decode(file_get_contents("php://input"), true);
 
@@ -14,10 +13,11 @@ if (
     exit;
 }
 
-$name     = trim($data["name"]);
-$email    = trim($data["email"]);
-$role_id  = (int) $data["role"];
-$password = password_hash($data["password"], PASSWORD_BCRYPT);
+$name    = trim($data["name"]);
+$email   = trim($data["email"]);
+$role_id = (int) $data["role"];
+
+$password = password_hash($data["password"], PASSWORD_BCRYPT, ['cost' => 10]);
 
 try {
     $check = $pdo->prepare("SELECT id FROM users WHERE email = ?");

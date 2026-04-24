@@ -1,7 +1,5 @@
 <?php
 
-// REMOVED session_start() from here
-
 $data = json_decode(file_get_contents("php://input"), true);
 
 if (empty($data["email"]) || empty($data["password"])) {

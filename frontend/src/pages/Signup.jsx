@@ -101,6 +101,7 @@ export default function Signup() {
                 className="w-full border-b border-[#CBD5E1] py-1.5 text-sm text-[#334155] appearance-none bg-transparent focus:outline-none"
               >
                 <option value="">Choose institutional role...</option>
+                <option value="1">Admin</option>
                 <option value="2">Dean</option>
                 <option value="3">Head of Department</option>
                 <option value="4">Rector</option>
