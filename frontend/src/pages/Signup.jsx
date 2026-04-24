@@ -3,7 +3,6 @@ import { Eye, ChevronDown } from "lucide-react";
 import PrimaryButton from "../components/auth/PrimaryButton";
 import AuthFooter from "../components/auth/AuthFooter";
 import { Link } from "react-router-dom";
-import { signup } from "../services/authService";
 
 export default function Signup() {
 
