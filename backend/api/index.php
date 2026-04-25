@@ -89,7 +89,13 @@ if ($method === "GET" && $uri === "/questions") {
 
 // EVALUATION ROUTES - Route to evaluation.php
 if (strpos($uri, "/evaluation") === 0) {
-    include __DIR__ . "/feature_evaluation/evaluation.php";
+    include __DIR__ . "/../endpoints/feature_evaluation/evaluation.php";
+    exit;
+}
+
+// MY ANSWERS ROUTES - Route to myAnswers.php
+if (strpos($uri, "/myAnswers") === 0) {
+    include __DIR__ . "/../endpoints/feature_myAnswers/myAnswers.php";
     exit;
 }
 
