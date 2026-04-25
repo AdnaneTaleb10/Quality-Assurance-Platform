@@ -117,6 +117,12 @@ if ($method === 'POST' && preg_match('#^/admin/users/(\d+)/references/(\d+)/vali
     exit;
 }
 
+// ── User dashboard ────────────────────────────────────────────────────────────
+if ($method === 'GET' && $uri === '/dashboard') {
+    require __DIR__ . '/../controllers/user/dashboard.php';
+    exit;
+}
+
 // ── 404 fallback ──────────────────────────────────────────────────────────────
 
 http_response_code(404);

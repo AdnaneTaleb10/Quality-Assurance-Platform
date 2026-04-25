@@ -8,9 +8,9 @@ import { login } from "../services/authService";
 import { validateLogin } from "../utils/validate";
 
 export default function Login() {
-  const [email, setEmail]       = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading]   = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -31,11 +31,8 @@ export default function Login() {
       toast.success(`Welcome back, ${result.user.name}!`);
 
       const role = result.user.role;
-      if (role === "Dean")                    navigate("/dashboard/dean");
-      else if (role === "Head of Department") navigate("/dashboard/hod");
-      else if (role === "Rector")             navigate("/dashboard/rector");
-      else                                    navigate("/admin-dashboard");
-
+      if (role === "Admin") navigate("/admin-dashboard");
+      else navigate("/dashboard");
     } catch (err) {
       const message = err.response?.data?.message || "Something went wrong";
       toast.error(message);
@@ -47,7 +44,6 @@ export default function Login() {
   return (
     <div className="h-screen flex flex-col items-center justify-center bg-[#F4F7FA] relative font-sans">
       <div className="w-[380px] bg-white border border-[#E2E8F0] rounded-xl shadow-sm pt-10 pb-8 px-10 flex flex-col items-center">
-
         <div className="mb-4">
           <img src="/favicon.svg" className="w-6 h-6" />
         </div>
@@ -57,7 +53,6 @@ export default function Login() {
         </h1>
 
         <form className="w-full" onSubmit={handleSubmit}>
-
           <div className="mb-5">
             <label className="block text-[10px] font-semibold text-[#255DAD] uppercase mb-2">
               Email
@@ -93,18 +88,19 @@ export default function Login() {
           <PrimaryButton type="submit" disabled={loading}>
             {loading ? "Connecting..." : "Connect"}
           </PrimaryButton>
-
         </form>
 
         <div className="w-full h-px bg-[#E2E8F0] my-6" />
 
         <div className="text-center">
           <p className="text-[13px] text-[#64748B]">Don't have an account?</p>
-          <Link to="/signup" className="text-[#2B6CB0] text-[13px] font-semibold hover:underline">
+          <Link
+            to="/signup"
+            className="text-[#2B6CB0] text-[13px] font-semibold hover:underline"
+          >
             Sign Up
           </Link>
         </div>
-
       </div>
       <AuthFooter absolute />
     </div>

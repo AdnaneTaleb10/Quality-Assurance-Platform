@@ -1,15 +1,18 @@
 // App.jsx
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/Protectedroute";
+
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import DashboardPage from "./pages/Dashboardpage";
+import AdminDashboardPage from "./pages/Dashboardpage";
+import UserDashboardPage from "./pages/UserDashboardPage";
 import ValidationPage from "./pages/ValidationPage";
 import UsersPage from "./pages/UserPage";
 import UserAnswersReviewPage from "./pages/UserAnswersReviewPage";
 import UserSubmissionsPage from "./pages/UserSubmissionsPage";
-
+/* import EvaluationPage from "./pages/EvaluationPage";
+ */
 function App() {
   return (
     <BrowserRouter>
@@ -19,12 +22,12 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        {/* Admin — all wrapped in ProtectedRoute */}
+        {/* Admin */}
         <Route
           path="/admin-dashboard"
           element={
             <ProtectedRoute>
-              <DashboardPage />
+              <AdminDashboardPage />
             </ProtectedRoute>
           }
         />
@@ -60,6 +63,26 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* User dashboard — all non-admin roles land here after login */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <UserDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Evaluation — reached from the Answer button in the dashboard table */}
+{/*         <Route
+          path="/evaluation/:questionId"
+          element={
+            <ProtectedRoute>
+              <EvaluationPage />
+            </ProtectedRoute>
+          }
+        /> */}
       </Routes>
     </BrowserRouter>
   );
