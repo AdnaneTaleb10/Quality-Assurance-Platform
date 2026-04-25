@@ -6,6 +6,7 @@ import {
   Users,
   LogOut,
 } from "lucide-react";
+import { logout } from "../../services/authService";
 
 const NAV_ITEMS = [
   {
@@ -28,9 +29,14 @@ const NAV_ITEMS = [
 export default function Sidebar() {
   const navigate = useNavigate();
 
-  function handleLogout() {
-    // Clear session/token here as needed, then redirect to login
-    navigate("/login");
+  async function handleLogout() {
+    try {
+      await logout(); // POST /auth/logout → session_destroy()
+    } catch {
+      // even if the request fails, clear client side and redirect
+    } finally {
+      navigate("/login", { replace: true });
+    }
   }
 
   return (
