@@ -1,18 +1,88 @@
+// App.jsx
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ProtectedRoute from "./components/Protectedroute";
 
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Evaluation from "./pages/Evaluation";
-
+import AdminDashboardPage from "./pages/Dashboardpage";
+import UserDashboardPage from "./pages/UserDashboardPage";
+import ValidationPage from "./pages/ValidationPage";
+import UsersPage from "./pages/UserPage";
+import UserAnswersReviewPage from "./pages/UserAnswersReviewPage";
+import UserSubmissionsPage from "./pages/UserSubmissionsPage";
+/* import EvaluationPage from "./pages/EvaluationPage";
+ */
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public */}
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/evaluation" element={<Evaluation />} />
+
+        {/* Admin */}
+        <Route
+          path="/admin-dashboard"
+          element={
+            <ProtectedRoute>
+              <AdminDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/validation"
+          element={
+            <ProtectedRoute>
+              <ValidationPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute>
+              <UsersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users/:userId/answers/pending"
+          element={
+            <ProtectedRoute>
+              <UserAnswersReviewPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users/:userId/submissions"
+          element={
+            <ProtectedRoute>
+              <UserSubmissionsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* User dashboard — all non-admin roles land here after login */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <UserDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Evaluation — reached from the Answer button in the dashboard table */}
+{/*         <Route
+          path="/evaluation/:questionId"
+          element={
+            <ProtectedRoute>
+              <EvaluationPage />
+            </ProtectedRoute>
+          }
+        /> */}
       </Routes>
     </BrowserRouter>
   );
