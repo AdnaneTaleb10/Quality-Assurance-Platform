@@ -1,44 +1,51 @@
 <?php
-// controllers/admin/stats.php
+// controllers/admin/dashboard_stats.php
 // GET /api/admin/stats
 
 require_once __DIR__ . '/../../db.php';
-
 header('Content-Type: application/json');
 
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+    http_response_code(405);
+    echo json_encode(['error' => 'Method not allowed']);
+    exit;
+}
+
 try {
-    // Total answers submitted
-    $total = (int) $pdo->query("SELECT COUNT(*) FROM answers")->fetchColumn();
-
-    // Approved — has a row in validations with status APPROVED
-    $approved = (int) $pdo->query("
-        SELECT COUNT(*) FROM validations WHERE status = 'APPROVED'
-    ")->fetchColumn();
-
-    // Pending — answers with NO row in validations yet
-    $pending = (int) $pdo->query("
-        SELECT COUNT(*) FROM answers a
+    // Single query for all counts to avoid multiple round-trips
+    $row = $pdo->query("
+        SELECT
+            COUNT(a.id)                                                        AS total_answers,
+            COUNT(CASE WHEN v.status = 'APPROVED' THEN 1 END)                  AS approved_answers,
+            COUNT(CASE WHEN v.status = 'REJECTED' THEN 1 END)                  AS rejected_answers,
+            COUNT(CASE WHEN v.id IS NULL           THEN 1 END)                  AS pending_validations,
+            COUNT(CASE WHEN v.status = 'REJECTED'
+                        AND v.validated_at >= NOW() - INTERVAL '7 days'
+                   THEN 1 END)                                                 AS critical_alerts
+        FROM answers a
         LEFT JOIN validations v ON v.answer_id = a.id
-        WHERE v.id IS NULL
-    ")->fetchColumn();
+    ")->fetch(PDO::FETCH_ASSOC);
 
-    // Critical alerts — REJECTED in the last 7 days  (PostgreSQL syntax)
-    $alerts = (int) $pdo->query("
-        SELECT COUNT(*) FROM validations
-        WHERE status = 'REJECTED'
-          AND validated_at >= NOW() - INTERVAL '7 days'
-    ")->fetchColumn();
-
-    $completionRate = $total > 0 ? round(($approved / $total) * 100, 1) : 0;
+    $total          = (int) $row['total_answers'];
+    $approved       = (int) $row['approved_answers'];
+    $rejected       = (int) $row['rejected_answers'];
+    $pending        = (int) $row['pending_validations'];
+    $alerts         = (int) $row['critical_alerts'];
+    $completionRate = $total > 0 ? round(($approved / $total) * 100, 1) : 0.0;
 
     echo json_encode([
         'completion_rate'     => $completionRate,
         'pending_validations' => $pending,
         'total_answers'       => $total,
+        'approved_answers'    => $approved,
+        'rejected_answers'    => $rejected,
         'critical_alerts'     => $alerts,
     ]);
+
 } catch (PDOException $e) {
     http_response_code(500);
-    // TEMP: expose message while debugging. Remove $e->getMessage() in production.
-    echo json_encode(['error' => 'Failed to fetch stats', 'detail' => $e->getMessage()]);
+    echo json_encode([
+        'error'  => 'Failed to fetch stats',
+        'detail' => $e->getMessage(),
+    ]);
 }

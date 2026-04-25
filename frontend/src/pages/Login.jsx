@@ -34,7 +34,7 @@ export default function Login() {
       if (role === "Dean")                    navigate("/dashboard/dean");
       else if (role === "Head of Department") navigate("/dashboard/hod");
       else if (role === "Rector")             navigate("/dashboard/rector");
-      else                                    navigate("/dashboard");
+      else                                    navigate("/admin-dashboard");
 
     } catch (err) {
       const message = err.response?.data?.message || "Something went wrong";

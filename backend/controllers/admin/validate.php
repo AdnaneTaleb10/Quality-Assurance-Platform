@@ -1,9 +1,9 @@
 <?php
 // controllers/admin/validate.php
 // POST /api/admin/validate
+// Body: { answer_id, status: APPROVED|REJECTED, comment? }
 
 require_once __DIR__ . '/../../db.php';
-
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -23,14 +23,19 @@ if (!$answerId || !is_numeric($answerId)) {
     exit;
 }
 
-if (!in_array($status, ['APPROVED', 'REJECTED'])) {
+if (!in_array($status, ['APPROVED', 'REJECTED'], true)) {
     http_response_code(400);
     echo json_encode(['error' => 'status must be APPROVED or REJECTED']);
     exit;
 }
 
+if ($status === 'REJECTED' && $comment === '') {
+    http_response_code(400);
+    echo json_encode(['error' => 'comment is required when rejecting']);
+    exit;
+}
+
 try {
-    // Check answer exists
     $check = $pdo->prepare("SELECT id FROM answers WHERE id = :id");
     $check->execute([':id' => $answerId]);
     if (!$check->fetch()) {
@@ -39,26 +44,28 @@ try {
         exit;
     }
 
-    // Upsert into validations table (insert or update if already reviewed)
+    // PostgreSQL UPSERT (requires UNIQUE constraint on validations.answer_id)
+    $adminId = $_SESSION['user_id'] ?? 1;
+
     $stmt = $pdo->prepare("
         INSERT INTO validations (answer_id, admin_id, status, comment, validated_at)
         VALUES (:answer_id, :admin_id, :status, :comment, NOW())
-        ON DUPLICATE KEY UPDATE
-            status       = VALUES(status),
-            comment      = VALUES(comment),
+        ON CONFLICT (answer_id) DO UPDATE SET
+            status       = EXCLUDED.status,
+            comment      = EXCLUDED.comment,
+            admin_id     = EXCLUDED.admin_id,
             validated_at = NOW()
     ");
 
-    // TODO: replace hardcoded 1 with the session's authenticated admin id
     $stmt->execute([
         ':answer_id' => $answerId,
-        ':admin_id'  => 1,
+        ':admin_id'  => $adminId,
         ':status'    => $status,
         ':comment'   => $comment,
     ]);
 
-    echo json_encode(['message' => 'Validation updated']);
+    echo json_encode(['message' => 'Validation updated', 'status' => $status]);
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'Failed to update validation']);
+    echo json_encode(['error' => 'Failed to update validation', 'detail' => $e->getMessage()]);
 }
