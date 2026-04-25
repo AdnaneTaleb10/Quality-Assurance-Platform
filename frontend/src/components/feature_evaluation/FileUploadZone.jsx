@@ -1,53 +1,59 @@
 import React, { useRef } from 'react';
+import { Upload, File } from 'lucide-react';
 
-const FileUploadZone = ({ uploadedFile, onFileUpload }) => {
-  const fileInputRef = useRef(null);
-
-  const handleFileChange = (e) => {
-    if (e.target.files[0]) onFileUpload(e.target.files[0]);
-  };
+const FileUploadZone = ({ documents, uploadedFile, onFileUpload }) => {
+  const fileInputRefs = useRef({});
 
   return (
-    <div
-      onClick={() => !uploadedFile && fileInputRef.current.click()}
-      className="border border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50 cursor-pointer"
-    >
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        className="hidden"
-      />
+    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex flex-col gap-3">
 
-      {uploadedFile ? (
-        <div className="flex flex-col items-center gap-2">
-          <p className="text-sm text-green-600">{uploadedFile.name}</p>
+      {documents.map((doc) => {
+        const file = uploadedFile?.[doc.key];
 
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onFileUpload(null);
-            }}
-            className="text-xs text-red-500 hover:text-red-700"
+        return (
+          <div
+            key={doc.key}
+            className="flex items-center justify-between bg-white border border-gray-200 rounded-md px-3 py-2 hover:bg-gray-100 cursor-pointer"
+            onClick={() => fileInputRefs.current[doc.key]?.click()}
           >
-            Remove file
-          </button>
-        </div>
-      ) : (
-        <>
-          <div className="w-10 h-10 mx-auto mb-3 bg-[#A1D2ED] rounded-lg flex items-center justify-center">
-            <img src="/upload_file.png"className="w-4 h-4 brightness-0" />
+
+            {/* TEXT */}
+            <div className="flex flex-col">
+              <span className="text-sm text-gray-700">{doc.label}</span>
+
+              {file ? (
+                <span className="text-[11px] text-green-600 mt-1 flex items-center gap-1">
+                  <File className="w-3 h-3" />
+                  {file.name}
+                </span>
+              ) : (
+                <span className="text-[10px] text-gray-400 mt-1">
+                  PNG or PDF only
+                </span>
+              )}
+            </div>
+
+            {/* ICON */}
+            {file ? (
+              <File className="w-4 h-4 text-green-600" />
+            ) : (
+              <Upload className="w-4 h-4 text-gray-500" />
+            )}
+
+            {/* INPUT */}
+            <input
+              ref={(el) => (fileInputRefs.current[doc.key] = el)}
+              type="file"
+              accept=".png,.pdf"
+              className="hidden"
+              onChange={(e) =>
+                onFileUpload(doc.key, e.target.files[0])
+              }
+            />
           </div>
+        );
+      })}
 
-          <p className="text-sm text-gray-600">
-            Drop safety certificate here
-          </p>
-
-          <p className="text-xs text-gray-400 mt-1">
-            PDF or JPEG (Max 10MB)
-          </p>
-        </>
-      )}
     </div>
   );
 };

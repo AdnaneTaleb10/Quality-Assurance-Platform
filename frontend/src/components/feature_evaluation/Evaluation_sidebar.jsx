@@ -4,7 +4,6 @@ import {
   ClipboardCheck,
   MessageSquare,
   LogOut,
-  Plus, // Importation de l'icône Plus
 } from "lucide-react";
 
 const navItems = [
@@ -15,9 +14,11 @@ const navItems = [
 
 export default function Sidebar() {
   return (
-    <aside className="w-56 min-h-screen bg-white border-r border-gray-100 flex flex-col">
-      {/* Logo */}
-      <div className="px-5 py-5 border-b border-gray-100">
+    // h-screen force la sidebar à prendre toute la hauteur de l'écran
+    <aside className="w-56 h-full bg-white border-r border-gray-100 flex flex-col">
+      
+      {/* Logo (flex-shrink-0 empêche sa réduction) */}
+      <div className="flex-shrink-0 px-5 py-5 border-b border-gray-100">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center">
             <ClipboardCheck className="w-5 h-5 text-blue-600" />
@@ -29,11 +30,10 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      {/* Nav (flex-1 prend tout l'espace disponible et défile si nécessaire) */}
+      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1 min-h-0">
         {navItems.map((item) => {
           const IconComponent = item.icon;
-
           return (
             <button
               key={item.label}
@@ -50,16 +50,8 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* New Evaluation Button */}
-      <div className="px-3 py-2">
-        <button className="w-full flex items-center justify-center gap-2 bg-[#1E56A0] text-white px-5 py-2.5 rounded-md text-sm font-medium shadow hover:bg-[#164685] transition-colors">
-          <Plus className="w-4 h-4" />
-          New Evaluation
-        </button>
-      </div>
-
-      {/* Logout Button */}
-      <div className="px-3 py-4 border-t border-gray-100">
+      {/* Logout Button (flex-shrink-0 garantit qu'il reste en bas) */}
+      <div className="flex-shrink-0 px-3 py-4 border-t border-gray-100">
         <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors">
           <LogOut className="w-4 h-4" />
           Logout

@@ -10,13 +10,31 @@ const QuestionCard = ({
   onFileUpload,
   onSaveAndContinue
 }) => {
+
+  const documents = [
+    {
+      key: "file1",
+      label: "Documents justifying compliance with standards (Civil engineering, anti-seismic, electrical…)"
+    },
+    {
+      key: "file2",
+      label: "Dedicated spaces per activity."
+    },
+    {
+      key: "file3",
+      label: "Ratios of premises area to number of people."
+    }
+  ];
+
   return (
     <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm w-full max-w-[600px] mx-auto">
 
+      {/* QUESTION */}
       <h3 className="text-[16px] font-medium text-[#1E293B] mb-6 leading-6">
         {question.text}
       </h3>
 
+      {/* YES / NO */}
       <div className="mb-6">
         <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3">
           YOUR DECLARATION
@@ -24,13 +42,20 @@ const QuestionCard = ({
         <YesNoSelector selected={selectedAnswer} onChange={onAnswerChange} />
       </div>
 
+      {/* UPLOAD (refactor ici) */}
       <div className="mb-6">
         <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3">
           PROOF OF CERTIFICATION
         </p>
-        <FileUploadZone uploadedFile={uploadedFile} onFileUpload={onFileUpload} />
+
+        <FileUploadZone
+          documents={documents}
+          uploadedFile={uploadedFile}
+          onFileUpload={onFileUpload}
+        />
       </div>
 
+      {/* BUTTON */}
       <div className="flex justify-end">
         <button
           onClick={onSaveAndContinue}
