@@ -13,6 +13,7 @@ import UserAnswersReviewPage from "./pages/UserAnswersReviewPage";
 import UserSubmissionsPage from "./pages/UserSubmissionsPage";
 import EvaluationPage from "./pages/Evaluation";
 import EvaluationDone from "./pages/EvaluationDone";
+import MyAnswersPage from "./pages/MyAnswers";
 
 function App() {
   return (
@@ -24,18 +25,82 @@ function App() {
         <Route path="/signup" element={<Signup />} />
 
         {/* Admin */}
-        <Route path="/admin-dashboard" element={<ProtectedRoute><AdminDashboardPage /></ProtectedRoute>} />
-        <Route path="/validation"      element={<ProtectedRoute><ValidationPage /></ProtectedRoute>} />
-        <Route path="/admin/users"     element={<ProtectedRoute><UsersPage /></ProtectedRoute>} />
-        <Route path="/admin/users/:userId/answers/pending"  element={<ProtectedRoute><UserAnswersReviewPage /></ProtectedRoute>} />
-        <Route path="/admin/users/:userId/submissions"      element={<ProtectedRoute><UserSubmissionsPage /></ProtectedRoute>} />
+        <Route
+          path="/admin-dashboard"
+          element={
+            <ProtectedRoute>
+              <AdminDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/validation"
+          element={
+            <ProtectedRoute>
+              <ValidationPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute>
+              <UsersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users/:userId/answers/pending"
+          element={
+            <ProtectedRoute>
+              <UserAnswersReviewPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users/:userId/submissions"
+          element={
+            <ProtectedRoute>
+              <UserSubmissionsPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* User */}
-        <Route path="/dashboard" element={<ProtectedRoute><UserDashboardPage /></ProtectedRoute>} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <UserDashboardPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Evaluation */}
-        <Route path="/evaluation/done"        element={<ProtectedRoute><EvaluationDone /></ProtectedRoute>} />
-        <Route path="/evaluation/:questionId" element={<ProtectedRoute><EvaluationPage /></ProtectedRoute>} />
+        <Route
+          path="/evaluation/done"
+          element={
+            <ProtectedRoute>
+              <EvaluationDone />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/evaluation/:questionId"
+          element={
+            <ProtectedRoute>
+              <EvaluationPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-answers"
+          element={
+            <ProtectedRoute>
+              <MyAnswersPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

@@ -143,6 +143,12 @@ if ($method === 'POST' && $uri === '/evaluation/submit') {
     exit;
 }
 
+// ── My Answers
+if ($method === 'GET' && $uri === '/my-answers') {
+    require __DIR__ . '/../controllers/user/my_answers.php';
+    exit;
+}
+
 // ── 404 fallback ──────────────────────────────────────────────────────────────
 
 http_response_code(404);

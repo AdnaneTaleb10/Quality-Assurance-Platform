@@ -1,35 +1,60 @@
-import React from "react";
+// components/feature_evaluation/Evaluation_sidebar.jsx
+import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   ClipboardCheck,
   MessageSquare,
   LogOut,
+  Loader2,
 } from "lucide-react";
 import { logout } from "../../services/authService";
+import { getNextQuestion } from "../../services/evaluationService";
 
 const navItems = [
-  { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
-  { label: "Evaluation", icon: ClipboardCheck, path: "/evaluation" },
-  { label: "My Answers", icon: MessageSquare, path: "/my-answers" },
+  { label: "Dashboard",  icon: LayoutDashboard, path: "/dashboard"  },
+  { label: "Evaluation", icon: ClipboardCheck,  path: "/evaluation" },
+  { label: "My Answers", icon: MessageSquare,   path: "/my-answers" },
 ];
 
 export default function Sidebar() {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate       = useNavigate();
+  const location       = useLocation();
+  const [loadingEval, setLoadingEval] = useState(false);
 
-  async function handleLogout() {
-    try {
-      await logout(); // POST /auth/logout → session_destroy()
-    } catch {
-      // even if the request fails, clear client side and redirect
-    } finally {
-      navigate("/login", { replace: true });
+  const isActive = (path) => {
+    if (path === "/evaluation") return location.pathname.startsWith("/evaluation");
+    return location.pathname === path;
+  };
+
+  const handleLogout = async () => {
+    try { await logout(); } catch (_) {}
+    navigate("/login", { replace: true });
+  };
+
+  const handleNav = async (path) => {
+    // My Answers and Dashboard navigate directly
+    if (path !== "/evaluation") {
+      navigate(path);
+      return;
     }
-  }
+
+    // Evaluation: resolve the first unanswered question first —
+    // /evaluation bare has no route so we never navigate there directly.
+    setLoadingEval(true);
+    try {
+      const { next_question_id } = await getNextQuestion();
+      navigate(next_question_id ? `/evaluation/${next_question_id}` : "/evaluation/done");
+    } catch {
+      navigate("/evaluation/done");
+    } finally {
+      setLoadingEval(false);
+    }
+  };
 
   return (
     <aside className="w-56 h-full bg-white border-r border-gray-100 flex flex-col">
+
       {/* Logo */}
       <div className="flex-shrink-0 px-5 py-5 border-b border-gray-100">
         <div className="flex items-center gap-3">
@@ -45,21 +70,27 @@ export default function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1 min-h-0">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = location.pathname === item.path;
+        {navItems.map(({ label, icon: Icon, path }) => {
+          const active  = isActive(path);
+          const isEval  = path === "/evaluation";
+          const loading = isEval && loadingEval;
+
           return (
             <button
-              key={item.label}
-              onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                isActive
+              key={label}
+              onClick={() => handleNav(path)}
+              disabled={loading}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-60 ${
+                active
                   ? "bg-blue-50 text-blue-700"
                   : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
               }`}
             >
-              <Icon className="w-4 h-4" />
-              {item.label}
+              {loading
+                ? <Loader2 className="w-4 h-4 animate-spin" />
+                : <Icon className="w-4 h-4" />
+              }
+              {label}
             </button>
           );
         })}
