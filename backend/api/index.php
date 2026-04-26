@@ -1,104 +1,152 @@
 <?php
+// public/index.php  (your API router)
 
+header("Access-Control-Allow-Origin: http://localhost:5173");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Credentials: true");
 header("Content-Type: application/json");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
+// ── Session cookie config ─────────────────────────────────────────────────────
+// Must be called BEFORE session_start().
+// For local dev (HTTP):  samesite=Lax,  secure=false
+// For production (HTTPS): samesite=None, secure=true
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path'     => '/',
+    'domain'   => '',     // empty = current hostname (works for localhost)
+    'secure'   => false,  // ← set to true in production (HTTPS only)
+    'httponly' => true,
+    'samesite' => 'Lax',  // ← set to 'None' in production
+]);
+session_start();
 
 require_once __DIR__ . "/../db.php";
 
 $method = $_SERVER['REQUEST_METHOD'];
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$uri    = preg_replace('#^.*?/api#', '', $uri);
+$uri    = rtrim($uri, '/');
 
-// remove /api prefix
-$uri = str_replace("/api", "", $uri);
+// ── Auth ──────────────────────────────────────────────────────────────────────
 
-// DOMAINS
-if ($method === "GET" && $uri === "/domains") {
-
-    $stmt = $pdo->query("SELECT id, name FROM domains");
-    echo json_encode($stmt->fetchAll());
+if ($method === "POST" && $uri === "/auth/register") {
+    require __DIR__ . "/../controllers/auth/register.php";
     exit;
 }
 
-// CHAMPS
-if ($method === "GET" && $uri === "/champs") {
-
-    $domainId = $_GET['domain_id'] ?? null;
-
-    if (!$domainId) {
-        http_response_code(400);
-        echo json_encode(["error" => "domain_id is required"]);
-        exit;
-    }
-
-    $stmt = $pdo->prepare("
-        SELECT id, domain_id, code, title 
-        FROM champs 
-        WHERE domain_id = ?
-    ");
-
-    $stmt->execute([$domainId]);
-
-    echo json_encode($stmt->fetchAll());
+if ($method === "POST" && $uri === "/auth/login") {
+    require __DIR__ . "/../controllers/auth/login.php";
     exit;
 }
 
-// REFERENCES
-if ($method === "GET" && $uri === "/references") {
-
-    $champId = $_GET['champ_id'] ?? null;
-
-    if (!$champId) {
-        http_response_code(400);
-        echo json_encode(["error" => "champ_id is required"]);
-        exit;
-    }
-
-    $stmt = $pdo->prepare("
-        SELECT id, champ_id, code, description, interpretation
-        FROM references_table
-        WHERE champ_id = ?
-    ");
-
-    $stmt->execute([$champId]);
-
-    echo json_encode($stmt->fetchAll());
+if ($method === "POST" && $uri === "/auth/logout") {
+    require __DIR__ . "/../controllers/auth/logout.php";
     exit;
 }
 
-// QUESTIONS
-if ($method === "GET" && $uri === "/questions") {
-
-    $referenceId = $_GET['reference_id'] ?? null;
-
-    if (!$referenceId) {
-        http_response_code(400);
-        echo json_encode(["error" => "reference_id is required"]);
-        exit;
-    }
-
-    $stmt = $pdo->prepare("
-        SELECT id, reference_id, code, text
-        FROM questions
-        WHERE reference_id = ?
-    ");
-
-    $stmt->execute([$referenceId]);
-
-    echo json_encode($stmt->fetchAll());
+if ($method === "GET" && $uri === "/auth/me") {
+    require __DIR__ . "/../controllers/auth/me.php";
     exit;
 }
 
-// EVALUATION ROUTES - Route to evaluation.php
-if (strpos($uri, "/evaluation") === 0) {
-    include __DIR__ . "/../endpoints/feature_evaluation/evaluation.php";
+// ── Admin — dashboard stats ───────────────────────────────────────────────────
+
+if ($method === 'GET' && $uri === '/admin/stats') {
+    require __DIR__ . '/../controllers/admin/stats.php';
     exit;
 }
 
-// MY ANSWERS ROUTES - Route to myAnswers.php
-if (strpos($uri, "/myAnswers") === 0) {
-    include __DIR__ . "/../endpoints/feature_myAnswers/myAnswers.php";
+// ── Admin — answers queue ─────────────────────────────────────────────────────
+
+if ($method === 'GET' && $uri === '/admin/answers') {
+    require __DIR__ . '/../controllers/admin/answers.php';
     exit;
 }
 
-// DEFAULT 404
+if ($method === 'POST' && $uri === '/admin/validate') {
+    require __DIR__ . '/../controllers/admin/validate.php';
+    exit;
+}
+
+// ── Admin — users list ────────────────────────────────────────────────────────
+
+if ($method === 'GET' && $uri === '/admin/users') {
+    require __DIR__ . '/../controllers/admin/users.php';
+    exit;
+}
+
+// ── Admin — per-user pending answers ─────────────────────────────────────────
+// ORDER MATTERS: must come before /submissions
+
+if ($method === 'GET' && preg_match('#^/admin/users/(\d+)/answers/pending$#', $uri, $m)) {
+    $_GET['user_id'] = $m[1];
+    require __DIR__ . '/../controllers/admin/user_pending_answers.php';
+    exit;
+}
+
+// ── Admin — per-user all submissions ─────────────────────────────────────────
+
+if ($method === 'GET' && preg_match('#^/admin/users/(\d+)/submissions$#', $uri, $m)) {
+    $_GET['user_id'] = $m[1];
+    require __DIR__ . '/../controllers/admin/user_submissions.php';
+    exit;
+}
+
+// ── Admin — single answer review ─────────────────────────────────────────────
+// POST /api/admin/answers/{answerId}/review
+
+if ($method === 'POST' && preg_match('#^/admin/answers/(\d+)/review$#', $uri, $m)) {
+    $_GET['answer_id'] = $m[1];
+    require __DIR__ . '/../controllers/admin/review_answer.php';
+    exit;
+}
+
+// ── Admin — bulk validate a reference ────────────────────────────────────────
+// POST /api/admin/users/{userId}/references/{referenceId}/validate
+
+if ($method === 'POST' && preg_match('#^/admin/users/(\d+)/references/(\d+)/validate$#', $uri, $m)) {
+    $_GET['user_id']      = $m[1];
+    $_GET['reference_id'] = $m[2];
+    require __DIR__ . '/../controllers/admin/validate_reference.php';
+    exit;
+}
+
+// ── User dashboard ────────────────────────────────────────────────────────────
+if ($method === 'GET' && $uri === '/dashboard') {
+    require __DIR__ . '/../controllers/user/dashboard.php';
+    exit;
+}
+
+
+// GET /api/evaluation/next  — must come BEFORE /api/evaluation/:id
+if ($method === 'GET' && $uri === '/evaluation/next') {
+    require __DIR__ . '/../controllers/evaluation/next_question.php';
+    exit;
+}
+ 
+// GET /api/evaluation/:questionId
+if ($method === 'GET' && preg_match('#^/evaluation/(\d+)$#', $uri, $m)) {
+    $_GET['question_id'] = $m[1];
+    require __DIR__ . '/../controllers/evaluation/get_question.php';
+    exit;
+}
+ 
+// POST /api/evaluation/submit
+if ($method === 'POST' && $uri === '/evaluation/submit') {
+    require __DIR__ . '/../controllers/evaluation/submit_answer.php';
+    exit;
+}
+
+// ── 404 fallback ──────────────────────────────────────────────────────────────
+
 http_response_code(404);
-echo json_encode(["error" => "Route not found"]);
+echo json_encode([
+    'error' => 'Route not found',
+    'uri'   => $uri,
+]);
