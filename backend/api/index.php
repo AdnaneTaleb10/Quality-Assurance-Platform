@@ -123,6 +123,26 @@ if ($method === 'GET' && $uri === '/dashboard') {
     exit;
 }
 
+
+// GET /api/evaluation/next  — must come BEFORE /api/evaluation/:id
+if ($method === 'GET' && $uri === '/evaluation/next') {
+    require __DIR__ . '/../controllers/evaluation/next_question.php';
+    exit;
+}
+ 
+// GET /api/evaluation/:questionId
+if ($method === 'GET' && preg_match('#^/evaluation/(\d+)$#', $uri, $m)) {
+    $_GET['question_id'] = $m[1];
+    require __DIR__ . '/../controllers/evaluation/get_question.php';
+    exit;
+}
+ 
+// POST /api/evaluation/submit
+if ($method === 'POST' && $uri === '/evaluation/submit') {
+    require __DIR__ . '/../controllers/evaluation/submit_answer.php';
+    exit;
+}
+
 // ── 404 fallback ──────────────────────────────────────────────────────────────
 
 http_response_code(404);

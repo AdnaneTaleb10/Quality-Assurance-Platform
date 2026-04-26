@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { PlusCircle, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-import Sidebar from "../components/UserDashboard/Evaluation_sidbar";
+import Sidebar from "../components/feature_evaluation/Evaluation_sidebar";
 import Topbar from "../components/layout/Topbar";
 import StatsBar from "../components/UserDashboard/StatsBar";
 import QuestionsTable from "../components/UserDashboard/QuestionsTable";
