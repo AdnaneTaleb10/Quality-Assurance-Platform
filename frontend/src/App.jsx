@@ -14,6 +14,7 @@ import UserSubmissionsPage from "./pages/UserSubmissionsPage";
 import EvaluationPage from "./pages/Evaluation";
 import EvaluationDone from "./pages/EvaluationDone";
 import MyAnswersPage from "./pages/MyAnswers";
+import UserManagementContent from "./pages/User_management";
 
 function App() {
   return (
@@ -62,6 +63,15 @@ function App() {
           element={
             <ProtectedRoute>
               <UserSubmissionsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/user-management"
+          element={
+            <ProtectedRoute>
+              <UserManagementContent />
             </ProtectedRoute>
           }
         />

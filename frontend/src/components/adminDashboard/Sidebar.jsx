@@ -1,9 +1,11 @@
+// components/adminDashboard/Sidebar.jsx
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   ClipboardCheck,
   LayoutDashboard,
   ClipboardList,
-  Users,
+  MessageSquareCheck,
+  UserCog,
   LogOut,
 } from "lucide-react";
 import { logout } from "../../services/authService";
@@ -20,9 +22,14 @@ const NAV_ITEMS = [
     to: "/validation",
   },
   {
-    label: "Users",
-    icon: Users,
+    label: "Answers",
+    icon: MessageSquareCheck,
     to: "/admin/users",
+  },
+  {
+    label: "User Management",
+    icon: UserCog,
+    to: "/admin/user-management",
   },
 ];
 
@@ -31,7 +38,7 @@ export default function Sidebar() {
 
   async function handleLogout() {
     try {
-      await logout(); // POST /auth/logout → session_destroy()
+      await logout();
     } catch {
       // even if the request fails, clear client side and redirect
     } finally {
@@ -60,8 +67,6 @@ export default function Sidebar() {
           <NavLink
             key={to}
             to={to}
-            // NavLink receives `isActive` from React Router and applies the
-            // correct class automatically — no manual pathname comparison needed.
             className={({ isActive }) =>
               `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 isActive
@@ -69,8 +74,7 @@ export default function Sidebar() {
                   : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
               }`
             }
-            // Mark /admin/users as active for all child routes
-            // (e.g. /admin/users/42/answers/pending)
+            // /admin/users and /admin/user-management stay active for child routes
             end={to === "/admin-dashboard" || to === "/validation"}
           >
             <Icon className="w-4 h-4" />

@@ -25,9 +25,23 @@ export const validateAnswer = async (payload) => {
 };
 
 // ---------- Users ----------
-// params: { search?: string }
 export const getUsers = async (params = {}) => {
   const response = await api.get("/admin/users", { params });
+  return response.data;
+};
+
+export const updateUserRole = async (userId, roleId) => {
+  const response = await api.put(`/admin/users/${userId}/role`, { role_id: roleId });
+  return response.data;
+};
+
+export const deleteUser = async (userId) => {
+  const response = await api.delete(`/admin/users/${userId}`);
+  return response.data;
+};
+
+export const getRoles = async () => {
+  const response = await api.get("/admin/roles");
   return response.data;
 };
 
@@ -37,7 +51,6 @@ export const getUserSubmissions = async (userId) => {
 };
 
 // ---------- Per-user pending answers ----------
-// GET /api/admin/users/{userId}/answers/pending
 export const getUserPendingAnswers = async (userId) => {
   if (!userId) throw new Error("userId is required");
   const response = await api.get(`/admin/users/${userId}/answers/pending`);
@@ -45,8 +58,6 @@ export const getUserPendingAnswers = async (userId) => {
 };
 
 // ---------- Single answer review ----------
-// Called as: reviewAnswer({ answer_id, status, comment })
-// POST /api/admin/answers/{answer_id}/review
 export const reviewAnswer = async ({ answer_id, status, comment = "" }) => {
   if (!answer_id) throw new Error("answer_id is required");
   const response = await api.post(`/admin/answers/${answer_id}/review`, {
@@ -57,7 +68,6 @@ export const reviewAnswer = async ({ answer_id, status, comment = "" }) => {
 };
 
 // ---------- Bulk validate a reference ----------
-// POST /api/admin/users/{userId}/references/{referenceId}/validate
 export const validateReference = async (userId, referenceId, payload) => {
   const response = await api.post(
     `/admin/users/${userId}/references/${referenceId}/validate`,

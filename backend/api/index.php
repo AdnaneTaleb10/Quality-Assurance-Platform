@@ -117,6 +117,26 @@ if ($method === 'POST' && preg_match('#^/admin/users/(\d+)/references/(\d+)/vali
     exit;
 }
 
+// GET /api/admin/roles  — fetch all roles for dropdowns
+if ($method === 'GET' && $uri === '/admin/roles') {
+    require __DIR__ . '/../controllers/admin/roles.php';
+    exit;
+}
+ 
+// PUT /api/admin/users/:id/role  — update a user's role
+if ($method === 'PUT' && preg_match('#^/admin/users/(\d+)/role$#', $uri, $m)) {
+    $_GET['user_id'] = $m[1];
+    require __DIR__ . '/../controllers/admin/update_user_role.php';
+    exit;
+}
+ 
+// DELETE /api/admin/users/:id
+if ($method === 'DELETE' && preg_match('#^/admin/users/(\d+)$#', $uri, $m)) {
+    $_GET['user_id'] = $m[1];
+    require __DIR__ . '/../controllers/admin/delete_user.php';
+    exit;
+}
+
 // ── User dashboard ────────────────────────────────────────────────────────────
 if ($method === 'GET' && $uri === '/dashboard') {
     require __DIR__ . '/../controllers/user/dashboard.php';
