@@ -1,9 +1,6 @@
 <?php
 // controllers/admin/users.php
 // GET /api/admin/users?search={optional}
-//
-// users table columns: id, name, email, password, role_id
-// (no created_at, no role — role comes from JOIN roles)
 
 require_once __DIR__ . '/../../db.php';
 
@@ -21,14 +18,20 @@ try {
             u.id,
             u.name,
             u.email,
-            COALESCE(r.name, 'USER')                          AS role,
-            COUNT(a.id)                                       AS total_answers,
+            COALESCE(r.name, 'USER')                           AS role,
+            COUNT(a.id)                                        AS total_answers,
+
+            -- Pending = answered but no validation row yet (v.id IS NULL)
+            -- OR validation row exists but status is still PENDING.
+            -- We count the answer once using a.id to avoid double-counting.
             COUNT(CASE
-                WHEN v.id IS NULL OR v.status = 'PENDING'
-                THEN 1 END)                                   AS pending_count,
+                WHEN a.id IS NOT NULL
+                 AND (v.id IS NULL OR v.status = 'PENDING')
+                THEN a.id END)                                 AS pending_count,
+
             COUNT(CASE WHEN v.status = 'APPROVED' THEN 1 END) AS approved_count,
             COUNT(CASE WHEN v.status = 'REJECTED' THEN 1 END) AS rejected_count,
-            MAX(a.created_at)                                 AS last_submission
+            MAX(a.created_at)                                  AS last_submission
         FROM users u
         LEFT JOIN roles       r ON r.id        = u.role_id
         LEFT JOIN answers     a ON a.user_id   = u.id
@@ -43,7 +46,7 @@ try {
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($rows as &$r) {
-        $r['joined_at']      = null;   // column doesn't exist in this schema
+        $r['joined_at']      = null;
         $r['total_answers']  = (int) $r['total_answers'];
         $r['pending_count']  = (int) $r['pending_count'];
         $r['approved_count'] = (int) $r['approved_count'];

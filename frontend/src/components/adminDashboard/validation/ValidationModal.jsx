@@ -1,26 +1,67 @@
 // components/adminDashboard/validation/ValidationModal.jsx
 import { useState } from "react";
-import { X, CheckCircle2, XCircle, FileText, ExternalLink } from "lucide-react";
+import { X, CheckCircle2, XCircle, FileText, ExternalLink, Image } from "lucide-react";
 import { validateAnswer } from "../../../services/adminService";
+
+const BACKEND = (import.meta.env.VITE_API_URL ?? "").replace(/\/api\/?$/, "");
+
+function proofUrl(filePath) {
+  return `${BACKEND}/${filePath}`;
+}
+
+function isImage(filePath = "") {
+  return /\.(png|jpe?g|gif|webp)$/i.test(filePath);
+}
+
+function ProofItem({ filePath, index }) {
+  const url  = proofUrl(filePath);
+  const img  = isImage(filePath);
+  const name = filePath.split("/").pop();
+
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors group"
+    >
+      {img
+        ? <Image    className="w-4 h-4 text-gray-400 group-hover:text-blue-500 shrink-0" />
+        : <FileText className="w-4 h-4 text-gray-400 group-hover:text-blue-500 shrink-0" />
+      }
+      <span className="text-sm text-blue-600 group-hover:text-blue-800 truncate flex-1">
+        Proof {index + 1} — {name}
+      </span>
+      <ExternalLink className="w-3.5 h-3.5 text-gray-400 group-hover:text-blue-500 shrink-0" />
+    </a>
+  );
+}
 
 export default function ValidationModal({ answer, onClose, onDone }) {
   const [comment, setComment] = useState(answer.comment ?? "");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error,   setError]   = useState(null);
+
+  const proofs = Array.isArray(answer.proofs) && answer.proofs.length > 0
+    ? answer.proofs
+    : answer.proof
+      ? [answer.proof]
+      : [];
 
   async function handleSubmit(status) {
+    if (status === "REJECTED" && comment.trim().length < 3) {
+      setError("A rejection reason (at least 3 characters) is required.");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
-      await validateAnswer({
-        answer_id: answer.answer_id,
-        status,
-        comment,
-      });
+      await validateAnswer({ answer_id: answer.answer_id, status, comment });
       onDone();
       onClose();
-    } catch {
-      setError("Failed to submit. Please try again.");
+    } catch (err) {
+      const msg = err?.response?.data?.error ?? "Failed to submit. Please try again.";
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -40,10 +81,7 @@ export default function ValidationModal({ answer, onClose, onDone }) {
           <h2 className="text-base font-semibold text-gray-900">
             Review Answer #{answer.answer_id}
           </h2>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-          >
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
             <X className="w-4 h-4 text-gray-500" />
           </button>
         </div>
@@ -66,33 +104,40 @@ export default function ValidationModal({ answer, onClose, onDone }) {
             <p className="text-gray-800">{answer.question}</p>
           </div>
 
-          {answer.proof && (
-            <a
-              href={`${import.meta.env.VITE_API_URL?.replace("/api", "")}/${answer.proof}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 transition-colors"
-            >
-              <FileText className="w-4 h-4" />
-              View Proof Document
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+          {/* Proofs */}
+          {proofs.length > 0 ? (
+            <div>
+              <p className="text-xs font-medium text-gray-500 mb-2">
+                Proof Documents ({proofs.length})
+              </p>
+              <div className="space-y-2">
+                {proofs.map((filePath, i) => (
+                  <ProofItem key={i} filePath={filePath} index={i} />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-400 italic">No proof documents uploaded.</p>
           )}
 
+          {/* Comment */}
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1.5">
-              Comment (optional)
+              Comment{" "}
+              <span className="text-gray-400 font-normal">(required when rejecting)</span>
             </label>
             <textarea
               rows={3}
               value={comment}
-              onChange={(e) => setComment(e.target.value)}
+              onChange={(e) => { setComment(e.target.value); setError(null); }}
               placeholder="Add a comment for the user..."
               className="w-full text-sm border border-gray-200 rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
             />
           </div>
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && (
+            <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">{error}</p>
+          )}
         </div>
 
         {/* Actions */}
@@ -111,7 +156,7 @@ export default function ValidationModal({ answer, onClose, onDone }) {
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-blue-900 text-white text-sm font-medium hover:bg-blue-950 transition-colors disabled:opacity-50"
           >
             <CheckCircle2 className="w-4 h-4" />
-            {loading ? "Saving..." : "Approve"}
+            {loading ? "Saving…" : "Approve"}
           </button>
         </div>
       </div>

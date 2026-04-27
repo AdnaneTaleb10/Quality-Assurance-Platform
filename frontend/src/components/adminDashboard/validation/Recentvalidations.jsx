@@ -1,4 +1,4 @@
-// components/adminDashboard/validation/RecentValidations.jsx
+// components/adminDashboard/validation/Recentvalidations.jsx
 // Shows only APPROVED and REJECTED answers (no PENDING)
 
 import { useEffect, useState } from "react";
@@ -30,12 +30,23 @@ export default function RecentValidations() {
   const navigate              = useNavigate();
 
   useEffect(() => {
-    // Fetch a larger pool then filter client-side to the 5 most recent validated
     getAnswers({ limit: 50 })
       .then((data) => {
-        const validated = data
+        // Guard: ensure data is an array (API might return error object)
+        const list = Array.isArray(data) ? data : [];
+
+        // Deduplicate by answer_id
+        const seen   = new Set();
+        const unique = list.filter((a) => {
+          if (seen.has(a.answer_id)) return false;
+          seen.add(a.answer_id);
+          return true;
+        });
+
+        const validated = unique
           .filter((a) => a.status === "APPROVED" || a.status === "REJECTED")
           .slice(0, 5);
+
         setAnswers(validated);
       })
       .catch(() => setError("Failed to load recent validations"))
@@ -97,7 +108,7 @@ export default function RecentValidations() {
               ) : (
                 answers.map((a, idx) => (
                   <tr
-                    key={a.answer_id}
+                    key={`${a.answer_id}-${idx}`}
                     className="border-b border-gray-50 last:border-none hover:bg-gray-50 transition-colors"
                   >
                     <td className="px-6 py-4 text-sm text-gray-300">{idx + 1}</td>

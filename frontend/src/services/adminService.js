@@ -40,9 +40,16 @@ export const deleteUser = async (userId) => {
   return response.data;
 };
 
+// getRoles tries the admin endpoint first (when logged in as admin),
+// then falls back to the public /roles endpoint (used on the signup page).
 export const getRoles = async () => {
-  const response = await api.get("/admin/roles");
-  return response.data;
+  try {
+    const response = await api.get("/admin/roles");
+    return response.data;
+  } catch {
+    const response = await api.get("/roles");
+    return response.data;
+  }
 };
 
 export const getUserSubmissions = async (userId) => {

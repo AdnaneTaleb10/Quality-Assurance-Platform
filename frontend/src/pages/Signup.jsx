@@ -1,34 +1,37 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff, ChevronDown } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import PrimaryButton from "../components/auth/PrimaryButton";
 import AuthFooter from "../components/auth/AuthFooter";
 import { signup } from "../services/authService";
+import { getRoles } from "../services/adminService";
 import { validateRegister } from "../utils/validate";
 
 export default function Signup() {
-  const [name, setName]         = useState("");
-  const [email, setEmail]       = useState("");
-  const [role, setRole]         = useState("");
-  const [password, setPassword] = useState("");
+  const [name, setName]                 = useState("");
+  const [email, setEmail]               = useState("");
+  const [role, setRole]                 = useState("");
+  const [password, setPassword]         = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading]   = useState(false);
+  const [loading, setLoading]           = useState(false);
+  const [roles, setRoles]               = useState([]);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    getRoles()
+      .then(setRoles)
+      .catch(() => toast.error("Could not load roles"));
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Frontend validation
     const error = validateRegister({ name, email, role, password });
-    if (error) {
-      toast.error(error);
-      return;
-    }
+    if (error) { toast.error(error); return; }
 
     setLoading(true);
-
     try {
       await signup({ name, email, role, password });
       toast.success("Account created! You can now log in.");
@@ -100,11 +103,12 @@ export default function Signup() {
                 onChange={(e) => setRole(e.target.value)}
                 className="w-full border-b border-[#CBD5E1] py-1.5 text-sm text-[#334155] appearance-none bg-transparent focus:outline-none"
               >
-                <option value="">Choose institutional role...</option>
-                <option value="1">Admin</option>
-                <option value="2">Dean</option>
-                <option value="3">Head of Department</option>
-                <option value="4">Rector</option>
+                <option value="">Choose institutional role…</option>
+                {roles.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.name}
+                  </option>
+                ))}
               </select>
               <ChevronDown className="absolute right-0 top-[28px] w-4 h-4 text-[#64748B] pointer-events-none" />
             </div>

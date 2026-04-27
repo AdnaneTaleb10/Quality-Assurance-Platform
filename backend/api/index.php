@@ -169,6 +169,40 @@ if ($method === 'GET' && $uri === '/my-answers') {
     exit;
 }
 
+if (
+    $method === 'GET' &&
+    preg_match('#^/uploads/proofs/([^/]+)$#', $uri, $m)
+) {
+    $filename = basename($m[1]); // basename() blocks directory traversal
+    $filepath = __DIR__ . '/../uploads/proofs/' . $filename;
+ 
+    if (!file_exists($filepath) || !is_file($filepath)) {
+        http_response_code(404);
+        echo json_encode(['error' => 'File not found']);
+        exit;
+    }
+ 
+    $ext   = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+    $mimes = [
+        'pdf'  => 'application/pdf',
+        'png'  => 'image/png',
+        'jpg'  => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'gif'  => 'image/gif',
+        'webp' => 'image/webp',
+    ];
+    $mime = $mimes[$ext] ?? 'application/octet-stream';
+ 
+    header('Access-Control-Allow-Origin: ' . ($_SERVER['HTTP_ORIGIN'] ?? '*'));
+    header('Content-Type: ' . $mime);
+    header('Content-Length: ' . filesize($filepath));
+    header('Content-Disposition: inline; filename="' . $filename . '"');
+    header('Cache-Control: private, max-age=3600');
+ 
+    readfile($filepath);
+    exit;
+}
+
 // ── 404 fallback ──────────────────────────────────────────────────────────────
 
 http_response_code(404);
