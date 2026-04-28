@@ -1,6 +1,4 @@
 <?php
-// controllers/admin/users.php
-// GET /api/admin/users?search={optional}
 
 require_once __DIR__ . '/../../db.php';
 

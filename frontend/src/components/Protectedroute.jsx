@@ -1,26 +1,28 @@
-// components/ProtectedRoute.jsx
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { getMe } from "../services/authService";
 
-export default function ProtectedRoute({ children, requireAdmin = false }) {
-  const [status, setStatus] = useState("loading"); // "loading" | "ok" | "unauth" | "forbidden"
-  const [role, setRole]     = useState(null);
+export default function ProtectedRoute({
+  children,
+  requireAdmin         = false,
+  requireAdminOrRector = false,
+}) {
+  const [status, setStatus] = useState("loading");
 
   useEffect(() => {
     getMe()
       .then((data) => {
-        const userRole = data.user.role;
-        setRole(userRole);
-
-        if (requireAdmin && userRole !== "Admin") {
+        const role = data.user.role;
+        if (requireAdmin && role !== "Admin") {
+          setStatus("forbidden");
+        } else if (requireAdminOrRector && role !== "Admin" && role !== "Rector") {
           setStatus("forbidden");
         } else {
           setStatus("ok");
         }
       })
       .catch(() => setStatus("unauth"));
-  }, [requireAdmin]);
+  }, [requireAdmin, requireAdminOrRector]);
 
   if (status === "loading") {
     return (
@@ -30,14 +32,7 @@ export default function ProtectedRoute({ children, requireAdmin = false }) {
     );
   }
 
-  if (status === "unauth") {
-    return <Navigate to="/login" replace />;
-  }
-
-  // Non-admin trying to access an admin route → send to their dashboard
-  if (status === "forbidden") {
-    return <Navigate to="/dashboard" replace />;
-  }
-
+  if (status === "unauth")    return <Navigate to="/login"     replace />;
+  if (status === "forbidden") return <Navigate to="/dashboard" replace />;
   return children;
 }

@@ -1,8 +1,4 @@
 <?php
-// controllers/evaluation/next_question.php
-// GET /api/evaluation/next
-// Returns the first unanswered question ID for the logged-in user's role.
-// Fast single query — no subquery nesting, uses LEFT JOIN anti-pattern.
 
 $userId   = $_SESSION['user']['id']   ?? null;
 $userRole = $_SESSION['user']['role'] ?? null;

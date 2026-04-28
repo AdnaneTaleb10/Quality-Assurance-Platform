@@ -1,6 +1,4 @@
 <?php
-// controllers/admin/roles.php
-// GET /api/admin/roles
 
 require_once __DIR__ . '/../../db.php';
 

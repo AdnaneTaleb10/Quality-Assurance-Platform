@@ -1,7 +1,4 @@
 <?php
-// controllers/evaluation/submit_answer.php
-// POST /api/evaluation/submit  (multipart/form-data)
-// Fields: question_id, answer (YES|NO), file_0 ... file_N
 
 $userId = $_SESSION['user']['id'] ?? null;
 if (!$userId) {

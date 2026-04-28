@@ -1,10 +1,4 @@
 <?php
-// controllers/admin/review_answer.php
-// Called by: POST /api/admin/answers/{answerId}/review
-// Router sets $_GET['answer_id'] from the URL segment.
-// Body (JSON): { status: "APPROVED"|"REJECTED", comment?: string }
-
-// session_start() is already called in index.php
 
 $answerId = isset($_GET['answer_id']) ? (int) $_GET['answer_id'] : 0;
 

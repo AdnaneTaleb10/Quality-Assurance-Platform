@@ -7,35 +7,31 @@ import AuthFooter from "../components/auth/AuthFooter";
 import { login } from "../services/authService";
 import { validateLogin } from "../utils/validate";
 
+// Roles that get access to the admin area (read-only for Rector)
+const ADMIN_ROLES = new Set(["Admin", "Rector"]);
+
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [email,    setEmail]    = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading,  setLoading]  = useState(false);
 
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Frontend validation
     const error = validateLogin({ email, password });
-    if (error) {
-      toast.error(error);
-      return;
-    }
+    if (error) { toast.error(error); return; }
 
     setLoading(true);
-
     try {
       const result = await login({ email, password });
       toast.success(`Welcome back, ${result.user.name}!`);
 
       const role = result.user.role;
-      if (role === "Admin") navigate("/admin-dashboard");
-      else navigate("/dashboard");
+      if (ADMIN_ROLES.has(role)) navigate("/admin-dashboard");
+      else                        navigate("/dashboard");
     } catch (err) {
-      const message = err.response?.data?.message || "Something went wrong";
-      toast.error(message);
+      toast.error(err.response?.data?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -48,15 +44,11 @@ export default function Login() {
           <img src="/favicon.svg" className="w-6 h-6" />
         </div>
 
-        <h1 className="text-[20px] font-semibold text-[#334155] mb-8">
-          Log in
-        </h1>
+        <h1 className="text-[20px] font-semibold text-[#334155] mb-8">Log in</h1>
 
         <form className="w-full" onSubmit={handleSubmit}>
           <div className="mb-5">
-            <label className="block text-[10px] font-semibold text-[#255DAD] uppercase mb-2">
-              Email
-            </label>
+            <label className="block text-[10px] font-semibold text-[#255DAD] uppercase mb-2">Email</label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
               <input
@@ -70,9 +62,7 @@ export default function Login() {
           </div>
 
           <div className="mb-6">
-            <label className="block text-[10px] font-semibold text-[#255DAD] uppercase mb-2">
-              Password
-            </label>
+            <label className="block text-[10px] font-semibold text-[#255DAD] uppercase mb-2">Password</label>
             <div className="relative">
               <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
               <input
@@ -94,10 +84,7 @@ export default function Login() {
 
         <div className="text-center">
           <p className="text-[13px] text-[#64748B]">Don't have an account?</p>
-          <Link
-            to="/signup"
-            className="text-[#2B6CB0] text-[13px] font-semibold hover:underline"
-          >
+          <Link to="/signup" className="text-[#2B6CB0] text-[13px] font-semibold hover:underline">
             Sign Up
           </Link>
         </div>

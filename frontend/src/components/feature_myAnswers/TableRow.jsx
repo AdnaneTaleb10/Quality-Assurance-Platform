@@ -1,10 +1,8 @@
 const TableRow = ({ item }) => {
 
-  // ✅ Normalisation (important pour backend)
   const answer = String(item.answer).toLowerCase();
   const status = String(item.status).toLowerCase();
 
-  // ✅ Config centralisée
   const STATUS_STYLES = {
     approved: "bg-[#ECFDF5] text-[#059669]",
     pending: "bg-[#F5F3FF] text-[#7C3AED]",
@@ -16,7 +14,6 @@ const TableRow = ({ item }) => {
     no: "bg-[#EFF6FF] text-[#2563EB]",
   };
 
-  // ✅ fallback (très important)
   const statusClass = STATUS_STYLES[status] || "bg-gray-100 text-gray-500";
   const answerClass = ANSWER_STYLES[answer] || "bg-gray-100 text-gray-500";
 

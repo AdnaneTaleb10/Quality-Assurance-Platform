@@ -1,6 +1,4 @@
 <?php
-// controllers/admin/dashboard_stats.php
-// GET /api/admin/stats
 
 require_once __DIR__ . '/../../db.php';
 header('Content-Type: application/json');

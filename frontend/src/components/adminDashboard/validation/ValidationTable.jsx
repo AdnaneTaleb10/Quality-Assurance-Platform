@@ -15,7 +15,7 @@ const answerStyles = {
   NO:  "bg-red-50 text-red-700 border border-red-200",
 };
 
-export default function ValidationTable({ search, status }) {
+export default function ValidationTable({ search, status, readOnly = false }) {
   const [answers,  setAnswers]  = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading,  setLoading]  = useState(true);
@@ -32,23 +32,18 @@ export default function ValidationTable({ search, status }) {
 
   useEffect(() => {
     let cancelled = false;
-
     async function fetchData() {
       setLoading(true);
       setError(null);
       try {
         const data = await getAnswers(status !== "ALL" ? { status } : {});
-        if (!cancelled) {
-          // Ensure we always set an array, never an error object
-          setAnswers(Array.isArray(data) ? data : []);
-        }
+        if (!cancelled) setAnswers(Array.isArray(data) ? data : []);
       } catch {
         if (!cancelled) setError("Failed to load answers");
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
-
     fetchData();
     return () => { cancelled = true; };
   }, [status]);
@@ -60,6 +55,8 @@ export default function ValidationTable({ search, status }) {
       (a.question ?? "").toLowerCase().includes(term),
   );
 
+  const cols = readOnly ? 4 : 5;
+
   return (
     <>
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -70,77 +67,44 @@ export default function ValidationTable({ search, status }) {
               <th className="px-6 py-3 text-left font-semibold">Question</th>
               <th className="px-6 py-3 text-left font-semibold">Answer</th>
               <th className="px-6 py-3 text-left font-semibold">Status</th>
-              <th className="px-6 py-3" />
+              {!readOnly && <th className="px-6 py-3" />}
             </tr>
           </thead>
-
           <tbody>
             {loading && (
-              <tr>
-                <td colSpan={5} className="px-6 py-10 text-center text-gray-400">
-                  Loading…
-                </td>
-              </tr>
+              <tr><td colSpan={cols} className="px-6 py-10 text-center text-gray-400">Loading…</td></tr>
             )}
-
             {error && !loading && (
-              <tr>
-                <td colSpan={5} className="px-6 py-10 text-center text-red-500">
-                  {error}
-                </td>
-              </tr>
+              <tr><td colSpan={cols} className="px-6 py-10 text-center text-red-500">{error}</td></tr>
             )}
-
             {!loading && !error && filtered.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-6 py-10 text-center text-gray-400">
-                  No submissions found.
-                </td>
-              </tr>
+              <tr><td colSpan={cols} className="px-6 py-10 text-center text-gray-400">No submissions found.</td></tr>
             )}
-
             {!loading && !error && filtered.map((a, idx) => (
-              <tr
-                key={`${a.answer_id}-${idx}`}
-                className="border-t border-gray-50 hover:bg-gray-50 transition-colors"
-              >
+              <tr key={`${a.answer_id}-${idx}`} className="border-t border-gray-50 hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4">
-                  <Link
-                    to={`/admin/users/${a.user_id}`}
-                    className="font-medium text-gray-800 hover:text-blue-600 transition-colors"
-                  >
+                  <Link to={`/admin/users/${a.user_id}`} className="font-medium text-gray-800 hover:text-blue-600 transition-colors">
                     {a.user}
                   </Link>
                 </td>
-                <td className="px-6 py-4 text-gray-700 max-w-md truncate">
-                  {a.question}
-                </td>
+                <td className="px-6 py-4 text-gray-700 max-w-md truncate">{a.question}</td>
                 <td className="px-6 py-4">
-                  <span
-                    className={`inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-full ${
-                      answerStyles[a.answer] ?? "bg-gray-100 text-gray-600"
-                    }`}
-                  >
+                  <span className={`inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-full ${answerStyles[a.answer] ?? "bg-gray-100 text-gray-600"}`}>
                     {a.answer}
                   </span>
                 </td>
                 <td className="px-6 py-4">
-                  <span
-                    className={`inline-flex items-center text-xs font-semibold px-3 py-1 rounded-full ${
-                      statusStyles[a.status] ?? "bg-gray-100 text-gray-600"
-                    }`}
-                  >
+                  <span className={`inline-flex items-center text-xs font-semibold px-3 py-1 rounded-full ${statusStyles[a.status] ?? "bg-gray-100 text-gray-600"}`}>
                     {a.status}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-right">
-                  <button
-                    onClick={() => setSelected(a)}
-                    className="text-blue-600 text-xs font-medium hover:text-blue-800"
-                  >
-                    Review
-                  </button>
-                </td>
+                {!readOnly && (
+                  <td className="px-6 py-4 text-right">
+                    <button onClick={() => setSelected(a)} className="text-blue-600 text-xs font-medium hover:text-blue-800">
+                      Review
+                    </button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -150,6 +114,7 @@ export default function ValidationTable({ search, status }) {
       {selected && (
         <ValidationModal
           answer={selected}
+          readOnly={readOnly}
           onClose={() => setSelected(null)}
           onDone={() => { setSelected(null); load(); }}
         />

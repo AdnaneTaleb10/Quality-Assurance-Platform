@@ -1,13 +1,4 @@
 <?php
-// controllers/admin/validate_reference.php
-// POST /api/admin/references/validate?user_id={id}&reference_id={id}
-//
-// Bulk approve/reject all answers under a reference for one user.
-// Body: { status: "APPROVED"|"REJECTED", comment?: string, revalidate?: bool }
-// If revalidate=true, also overrides already-validated answers.
-//
-// Requires UNIQUE constraint on validations(answer_id):
-//   ALTER TABLE validations ADD CONSTRAINT validations_answer_id_key UNIQUE (answer_id);
 
 require_once __DIR__ . '/../../db.php';
 header('Content-Type: application/json');

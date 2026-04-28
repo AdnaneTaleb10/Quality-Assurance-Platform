@@ -1,14 +1,4 @@
 <?php
-// controllers/admin/user_pending_answers.php
-// Called by: GET /api/admin/users/{userId}/answers/pending
-// Router sets $_GET['user_id'] from the URL segment.
-//
-// Actual schema:
-//   references_table: id, champ_id, code, description, interpretation  (no title)
-//   questions:        id, reference_id, code, text
-//   answers:          id, user_id, question_id, answer, created_at      (no comment)
-//   proofs:           id, answer_id, file_path, uploaded_at             (no url/mime_type/file_name/size_bytes)
-//   users:            id, name, email, password, role_id                (no created_at)
 
 require_once __DIR__ . '/../../db.php';
 
@@ -44,8 +34,6 @@ try {
     $user['joined_at'] = null;
 
     // ── Pending answers ───────────────────────────────────────────────────────
-    // references_table has no title — use COALESCE(code, description) as label
-    // proofs has only file_path — map it to proof.url for the frontend
     $sql = "
         SELECT
             ref.id                                          AS reference_id,

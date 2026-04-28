@@ -1,6 +1,4 @@
 <?php
-// controllers/admin/answers.php
-// GET /api/admin/answers
 
 require_once __DIR__ . '/../../db.php';
 
@@ -56,8 +54,6 @@ try {
     $stmt->execute($params);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // json_agg returns a JSON string from PostgreSQL — decode it into a PHP array.
-    // If no proofs exist, json_agg returns NULL.
     foreach ($rows as &$row) {
         $raw           = $row['proofs'];
         $paths         = ($raw !== null) ? json_decode($raw, true) : [];

@@ -1,6 +1,4 @@
 <?php
-// controllers/admin/update_user_role.php
-// PUT /api/admin/users/:id/role
 
 require_once __DIR__ . '/../../db.php';
 

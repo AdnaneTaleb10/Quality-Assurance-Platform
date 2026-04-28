@@ -20,62 +20,69 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* ── Public ──────────────────────────────────────────────────────── */}
+        {/* ── Public ──────────────────────────────────────────────────── */}
         <Route path="/"       element={<Landing />} />
         <Route path="/login"  element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        {/* ── Admin-only ───────────────────────────────────────────────────── */}
+        {/* ── Admin only ──────────────────────────────────────────────── */}
         <Route
           path="/admin-dashboard"
           element={
-            <ProtectedRoute requireAdmin>
+            <ProtectedRoute requireAdminOrRector>
               <AdminDashboardPage />
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/validation"
-          element={
-            <ProtectedRoute requireAdmin>
-              <ValidationPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/users"
-          element={
-            <ProtectedRoute requireAdmin>
-              <UsersPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/users/:userId/answers/pending"
-          element={
-            <ProtectedRoute requireAdmin>
-              <UserAnswersReviewPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/users/:userId/submissions"
-          element={
-            <ProtectedRoute requireAdmin>
-              <UserSubmissionsPage />
-            </ProtectedRoute>
-          }
-        />
+        {/* User Management — Admin can edit/delete, Rector read-only */}
         <Route
           path="/admin/user-management"
           element={
-            <ProtectedRoute requireAdmin>
+            <ProtectedRoute requireAdminOrRector>
               <UserManagementContent />
             </ProtectedRoute>
           }
         />
 
-        {/* ── Any authenticated user ───────────────────────────────────────── */}
+        {/* ── Admin + Rector (read-only for Rector) ───────────────────── */}
+        {/* Validation queue — Rector sees it but can't approve/reject */}
+        <Route
+          path="/validation"
+          element={
+            <ProtectedRoute requireAdminOrRector>
+              <ValidationPage />
+            </ProtectedRoute>
+          }
+        />
+        {/* Users list */}
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute requireAdminOrRector>
+              <UsersPage />
+            </ProtectedRoute>
+          }
+        />
+        {/* Per-user pending answers — Rector sees but cannot approve/reject */}
+        <Route
+          path="/admin/users/:userId/answers/pending"
+          element={
+            <ProtectedRoute requireAdminOrRector>
+              <UserAnswersReviewPage />
+            </ProtectedRoute>
+          }
+        />
+        {/* Per-user all submissions */}
+        <Route
+          path="/admin/users/:userId/submissions"
+          element={
+            <ProtectedRoute requireAdminOrRector>
+              <UserSubmissionsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ── Any authenticated user ───────────────────────────────────── */}
         <Route
           path="/dashboard"
           element={

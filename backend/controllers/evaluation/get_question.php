@@ -1,6 +1,4 @@
 <?php
-// controllers/evaluation/get_question.php
-// GET /api/evaluation/:questionId
 
 $userId   = $_SESSION['user']['id']   ?? null;
 $userRole = $_SESSION['user']['role'] ?? null;

@@ -1,7 +1,4 @@
 <?php
-// controllers/auth/logout.php
-// Called by: POST /auth/logout
-// session_start() is already called in index.php
 
 $_SESSION = [];
 

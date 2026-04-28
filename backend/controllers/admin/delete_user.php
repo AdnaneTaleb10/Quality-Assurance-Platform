@@ -1,6 +1,4 @@
 <?php
-// controllers/admin/delete_user.php
-// DELETE /api/admin/users/:id
 
 require_once __DIR__ . '/../../db.php';
 

@@ -1,7 +1,4 @@
 <?php
-// controllers/admin/validate.php
-// POST /api/admin/validate
-// Body: { answer_id, status: APPROVED|REJECTED, comment? }
 
 require_once __DIR__ . '/../../db.php';
 header('Content-Type: application/json');

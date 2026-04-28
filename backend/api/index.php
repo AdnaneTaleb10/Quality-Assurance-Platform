@@ -12,17 +12,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-// ── Session cookie config ─────────────────────────────────────────────────────
-// Must be called BEFORE session_start().
-// For local dev (HTTP):  samesite=Lax,  secure=false
-// For production (HTTPS): samesite=None, secure=true
 session_set_cookie_params([
     'lifetime' => 0,
     'path'     => '/',
-    'domain'   => '',     // empty = current hostname (works for localhost)
-    'secure'   => false,  // ← set to true in production (HTTPS only)
+    'domain'   => '',     
+    'secure'   => false, 
     'httponly' => true,
-    'samesite' => 'Lax',  // ← set to 'None' in production
+    'samesite' => 'Lax', 
 ]);
 session_start();
 
@@ -82,7 +78,6 @@ if ($method === 'GET' && $uri === '/admin/users') {
 }
 
 // ── Admin — per-user pending answers ─────────────────────────────────────────
-// ORDER MATTERS: must come before /submissions
 
 if ($method === 'GET' && preg_match('#^/admin/users/(\d+)/answers/pending$#', $uri, $m)) {
     $_GET['user_id'] = $m[1];
@@ -99,7 +94,6 @@ if ($method === 'GET' && preg_match('#^/admin/users/(\d+)/submissions$#', $uri, 
 }
 
 // ── Admin — single answer review ─────────────────────────────────────────────
-// POST /api/admin/answers/{answerId}/review
 
 if ($method === 'POST' && preg_match('#^/admin/answers/(\d+)/review$#', $uri, $m)) {
     $_GET['answer_id'] = $m[1];
@@ -108,7 +102,6 @@ if ($method === 'POST' && preg_match('#^/admin/answers/(\d+)/review$#', $uri, $m
 }
 
 // ── Admin — bulk validate a reference ────────────────────────────────────────
-// POST /api/admin/users/{userId}/references/{referenceId}/validate
 
 if ($method === 'POST' && preg_match('#^/admin/users/(\d+)/references/(\d+)/validate$#', $uri, $m)) {
     $_GET['user_id']      = $m[1];

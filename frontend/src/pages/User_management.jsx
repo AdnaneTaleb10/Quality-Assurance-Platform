@@ -1,6 +1,6 @@
 // pages/UserManagementPage.jsx
 // Route: /admin/user-management
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Users,
   Search,
@@ -18,6 +18,7 @@ import Sidebar from "../components/adminDashboard/Sidebar";
 import Topbar from "../components/layout/Topbar";
 import { getUsers, getRoles, updateUserRole, deleteUser } from "../services/adminService";
 import { getMe } from "../services/authService";
+import { useRole } from "../hooks/useRole";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -119,6 +120,7 @@ function Toast({ message, type = "success", onDone }) {
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function UserManagementPage() {
+  const { readOnly } = useRole();
   const [users, setUsers]               = useState([]);
   const [roles, setRoles]               = useState([]);
   const [currentUser, setCurrentUser]   = useState(null);
@@ -248,9 +250,16 @@ export default function UserManagementPage() {
         <main className="flex-1 overflow-y-auto px-8 py-8">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
-              User Management
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+                User Management
+              </h1>
+              {readOnly && (
+                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
+                  Read-only
+                </span>
+              )}
+            </div>
             <p className="text-sm text-gray-500 mt-1">
               View, filter, and manage roles for all registered users.
             </p>
@@ -343,7 +352,7 @@ export default function UserManagementPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100">
-                  {["User", "Email", "Role", "Answers", "Status Breakdown", "Actions"].map((h) => (
+                  {["User", "Email", "Role", "Answers", "Status Breakdown", ...(readOnly ? [] : ["Actions"])].map((h) => (
                     <th
                       key={h}
                       className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide px-6 py-3"
@@ -443,7 +452,8 @@ export default function UserManagementPage() {
                           </div>
                         </td>
 
-                        {/* Actions */}
+                        {/* Actions — hidden for Rector */}
+                        {!readOnly && (
                         <td className="px-6 py-4">
                           {isEditing ? (
                             <div className="flex items-center gap-2">
@@ -486,6 +496,7 @@ export default function UserManagementPage() {
                             </div>
                           )}
                         </td>
+                        )}
                       </tr>
                     );
                   })

@@ -1,7 +1,4 @@
 <?php
-// controllers/public/roles.php
-// GET /api/roles  — public endpoint, no auth required
-// Used by the signup page to populate the role dropdown.
 
 require_once __DIR__ . '/../../db.php';
 

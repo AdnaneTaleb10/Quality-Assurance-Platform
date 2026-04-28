@@ -1,6 +1,4 @@
 <?php
-// controllers/user/dashboard.php
-// Called by: GET /api/dashboard
 
 $userId   = $_SESSION['user']['id']   ?? null;
 $userRole = $_SESSION['user']['role'] ?? null; // stored as role name string
@@ -40,14 +38,7 @@ try {
     ");
     $verifiedRefs = (int) $verifiedStmt->fetchColumn();
 
-    // ── 3. Questions assigned to this role that the user has NOT answered ──────
-    // - Filters by question_roles so each role only sees their questions
-    // - Excludes questions already answered by this user
-    // - proofs_required = count of proof items from the docx per question
-    //   stored as a subquery counting rows in a proofs_list lookup,
-    //   but since we have no separate table for required proofs count,
-    //   we count distinct proof numbers mentioned (hardcoded via CASE).
-    //   If you later add a proofs_required column to questions, swap the CASE.
+  
 
     $questionsStmt = $pdo->prepare("
         SELECT
