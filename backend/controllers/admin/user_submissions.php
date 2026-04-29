@@ -10,14 +10,13 @@ if ($userId <= 0) {
     exit;
 }
 
+// Base URL of this server — used to build absolute proof URLs
+$baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
+         . '://' . $_SERVER['HTTP_HOST'];
+
 try {
-    // ── User ─────────────────────────────────────────────────────────────────
     $uStmt = $pdo->prepare("
-        SELECT
-            u.id,
-            u.name,
-            u.email,
-            COALESCE(r.name, 'USER') AS role
+        SELECT u.id, u.name, u.email, COALESCE(r.name, 'USER') AS role
         FROM users u
         LEFT JOIN roles r ON r.id = u.role_id
         WHERE u.id = :id
@@ -33,7 +32,6 @@ try {
 
     $user['joined_at'] = null;
 
-    // ── All answers ───────────────────────────────────────────────────────────
     $sql = "
         SELECT
             ref.id                                              AS reference_id,
@@ -48,10 +46,10 @@ try {
             v.validated_at                                      AS validated_at,
             p.file_path                                         AS proof_file_path
         FROM answers a
-        JOIN questions            q   ON q.id         = a.question_id
-        JOIN references_table     ref ON ref.id        = q.reference_id
-        LEFT JOIN proofs          p   ON p.answer_id  = a.id
-        LEFT JOIN validations     v   ON v.answer_id  = a.id
+        JOIN questions            q   ON q.id        = a.question_id
+        JOIN references_table     ref ON ref.id       = q.reference_id
+        LEFT JOIN proofs          p   ON p.answer_id = a.id
+        LEFT JOIN validations     v   ON v.answer_id = a.id
         WHERE a.user_id = :uid
         ORDER BY ref.code ASC, q.id ASC, a.id ASC
     ";
@@ -60,7 +58,6 @@ try {
     $stmt->execute([':uid' => $userId]);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // ── Group by reference ────────────────────────────────────────────────────
     $refsMap = [];
     foreach ($rows as $row) {
         $rid    = (int) $row['reference_id'];
@@ -84,7 +81,7 @@ try {
         $proof = null;
         if (!empty($row['proof_file_path'])) {
             $proof = [
-                'url'        => $row['proof_file_path'],
+                'url'        => $baseUrl . '/' . ltrim($row['proof_file_path'], '/'),
                 'mime_type'  => null,
                 'file_name'  => basename($row['proof_file_path']),
                 'size_bytes' => null,
@@ -112,8 +109,5 @@ try {
 
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode([
-        'error'  => 'Failed to fetch user submissions',
-        'detail' => $e->getMessage(),
-    ]);
+    echo json_encode(['error' => 'Failed to fetch user submissions', 'detail' => $e->getMessage()]);
 }

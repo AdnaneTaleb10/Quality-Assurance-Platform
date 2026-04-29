@@ -4,6 +4,7 @@ import { X, CheckCircle2, XCircle, FileText, ExternalLink, Image } from "lucide-
 import { validateAnswer } from "../../../services/adminService";
 
 const BACKEND = (import.meta.env.VITE_API_URL ?? "").replace(/\/api\/?$/, "");
+console.log(BACKEND)
 
 function proofUrl(filePath) {
   return `${BACKEND}/${filePath}`;

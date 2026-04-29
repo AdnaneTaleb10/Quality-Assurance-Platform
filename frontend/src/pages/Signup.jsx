@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Eye, EyeOff, ChevronDown } from "lucide-react";
+import { Eye, EyeOff, ChevronDown, ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import PrimaryButton from "../components/auth/PrimaryButton";
@@ -27,7 +27,6 @@ export default function Signup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const error = validateRegister({ name, email, role, password });
     if (error) { toast.error(error); return; }
 
@@ -45,7 +44,19 @@ export default function Signup() {
   };
 
   return (
-    <div className="h-screen w-full flex flex-col bg-[#F4F7FA] overflow-hidden">
+    <div className="h-screen w-full flex flex-col bg-[#F4F7FA] overflow-hidden relative">
+
+      {/* Back to landing */}
+      <div className="absolute top-6 left-6">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-sm text-[#64748B] hover:text-[#334155] transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </Link>
+      </div>
+
       <div className="flex-grow" />
 
       <div className="flex justify-center px-4">

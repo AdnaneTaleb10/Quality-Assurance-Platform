@@ -8,6 +8,9 @@ export default function AuthFooter({ absolute = false }) {
       <p className="text-[11px] text-[#94A3B8]">
         © 2026 Institutional Excellence Quality Assurance. All rights reserved.
       </p>
+      <p className="text-[11px] text-[#94A3B8] mt-1">
+        Developed by TALEB Mohamed Adnane &amp; GUERID Hocine
+      </p>
     </div>
   );
 }

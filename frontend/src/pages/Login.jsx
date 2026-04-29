@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mail, Key } from "lucide-react";
+import { Mail, Key, ArrowLeft } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
 import PrimaryButton from "../components/auth/PrimaryButton";
@@ -7,7 +7,6 @@ import AuthFooter from "../components/auth/AuthFooter";
 import { login } from "../services/authService";
 import { validateLogin } from "../utils/validate";
 
-// Roles that get access to the admin area (read-only for Rector)
 const ADMIN_ROLES = new Set(["Admin", "Rector"]);
 
 export default function Login() {
@@ -26,7 +25,6 @@ export default function Login() {
     try {
       const result = await login({ email, password });
       toast.success(`Welcome back, ${result.user.name}!`);
-
       const role = result.user.role;
       if (ADMIN_ROLES.has(role)) navigate("/admin-dashboard");
       else                        navigate("/dashboard");
@@ -39,6 +37,18 @@ export default function Login() {
 
   return (
     <div className="h-screen flex flex-col items-center justify-center bg-[#F4F7FA] relative font-sans">
+
+      {/* Back to landing */}
+      <div className="absolute top-6 left-6">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-sm text-[#64748B] hover:text-[#334155] transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </Link>
+      </div>
+
       <div className="w-[380px] bg-white border border-[#E2E8F0] rounded-xl shadow-sm pt-10 pb-8 px-10 flex flex-col items-center">
         <div className="mb-4">
           <img src="/favicon.svg" className="w-6 h-6" />
@@ -89,6 +99,7 @@ export default function Login() {
           </Link>
         </div>
       </div>
+
       <AuthFooter absolute />
     </div>
   );

@@ -10,14 +10,13 @@ if ($userId <= 0) {
     exit;
 }
 
+// Base URL of this server — used to build absolute proof URLs
+$baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
+         . '://' . $_SERVER['HTTP_HOST'];
+
 try {
-    // ── User ─────────────────────────────────────────────────────────────────
     $uStmt = $pdo->prepare("
-        SELECT
-            u.id,
-            u.name,
-            u.email,
-            COALESCE(r.name, 'USER') AS role
+        SELECT u.id, u.name, u.email, COALESCE(r.name, 'USER') AS role
         FROM users u
         LEFT JOIN roles r ON r.id = u.role_id
         WHERE u.id = :id
@@ -33,23 +32,22 @@ try {
 
     $user['joined_at'] = null;
 
-    // ── Pending answers ───────────────────────────────────────────────────────
     $sql = "
         SELECT
-            ref.id                                          AS reference_id,
+            ref.id                                            AS reference_id,
             COALESCE(ref.code, ref.description, 'Reference') AS reference_title,
-            q.id                                            AS question_id,
-            q.text                                          AS question_text,
-            a.id                                            AS answer_id,
-            a.answer                                        AS response,
-            a.created_at                                    AS submitted_at,
-            p.file_path                                     AS proof_file_path,
-            p.uploaded_at                                   AS proof_uploaded_at
+            q.id                                              AS question_id,
+            q.text                                            AS question_text,
+            a.id                                              AS answer_id,
+            a.answer                                          AS response,
+            a.created_at                                      AS submitted_at,
+            p.file_path                                       AS proof_file_path,
+            p.uploaded_at                                     AS proof_uploaded_at
         FROM answers a
-        JOIN questions            q   ON q.id         = a.question_id
-        JOIN references_table     ref ON ref.id        = q.reference_id
-        LEFT JOIN proofs          p   ON p.answer_id  = a.id
-        LEFT JOIN validations     v   ON v.answer_id  = a.id
+        JOIN questions            q   ON q.id        = a.question_id
+        JOIN references_table     ref ON ref.id       = q.reference_id
+        LEFT JOIN proofs          p   ON p.answer_id = a.id
+        LEFT JOIN validations     v   ON v.answer_id = a.id
         WHERE a.user_id = :uid
           AND (v.id IS NULL OR v.status = 'PENDING')
         ORDER BY ref.code ASC, q.id ASC, a.id ASC
@@ -59,7 +57,6 @@ try {
     $stmt->execute([':uid' => $userId]);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // ── Group by reference ────────────────────────────────────────────────────
     $refsMap = [];
     foreach ($rows as $row) {
         $rid = (int) $row['reference_id'];
@@ -72,11 +69,10 @@ try {
             ];
         }
 
-        // Map file_path → proof object shape the frontend (ProofViewer) expects
         $proof = null;
         if (!empty($row['proof_file_path'])) {
             $proof = [
-                'url'        => $row['proof_file_path'],  // use file_path as url
+                'url'        => $baseUrl . '/' . ltrim($row['proof_file_path'], '/'),
                 'mime_type'  => null,
                 'file_name'  => basename($row['proof_file_path']),
                 'size_bytes' => null,
@@ -95,9 +91,7 @@ try {
     }
 
     $references   = array_values($refsMap);
-    $totalPending = array_sum(
-        array_map(fn($r) => count($r['answers']), $references)
-    );
+    $totalPending = array_sum(array_map(fn($r) => count($r['answers']), $references));
 
     echo json_encode([
         'user'          => $user,
@@ -107,8 +101,5 @@ try {
 
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode([
-        'error'  => 'Failed to fetch pending answers',
-        'detail' => $e->getMessage(),
-    ]);
+    echo json_encode(['error' => 'Failed to fetch pending answers', 'detail' => $e->getMessage()]);
 }

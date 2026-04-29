@@ -19,8 +19,13 @@ export default function Footer() {
           Mohamed Khider University of Biskra
         </a>
 
+        {/* DEVELOPERS */}
+        <p className="text-white/70 text-xs">
+          Developed by TALEB Mohamed Adnane &amp; GUERID Hocine
+        </p>
+
         {/* COPYRIGHT */}
-        <p className="text-white/50 text-xs mt-2">
+        <p className="text-white/50 text-xs">
           © {new Date().getFullYear()} Academic Assurance. Developed as part of a university academic project.
         </p>
 
